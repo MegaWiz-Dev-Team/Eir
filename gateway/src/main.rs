@@ -12,13 +12,19 @@
 //! - Health check endpoints
 //! - OpenAPI documentation with Scalar UI
 //! - CORS support
+//! - Bifrost agent tool endpoints (Sprint 3)
+//! - Mimir knowledge sync webhooks (Sprint 3)
+//! - A2A protocol support (Sprint 3)
 
+mod a2a;
+mod agent_tools;
 mod audit;
 mod auth;
 mod cache;
 mod config;
 mod fhir;
 mod health;
+mod knowledge;
 mod openapi;
 mod proxy;
 mod rate_limit;
@@ -29,8 +35,10 @@ use std::sync::Arc;
 use tower_http::cors::{Any, CorsLayer};
 use tracing_subscriber::{fmt, EnvFilter};
 
+use crate::a2a::A2ATaskStore;
 use crate::cache::ResponseCache;
 use crate::config::Config;
+use crate::knowledge::KnowledgeStore;
 use crate::rate_limit::RateLimiterState;
 
 #[tokio::main]
@@ -63,6 +71,10 @@ async fn main() {
     let response_cache = Arc::new(ResponseCache::new(config.cache_ttl_secs));
     let rate_limiter = Arc::new(RateLimiterState::new(config.rate_limit_rps));
 
+    // Sprint 3 state: knowledge store + A2A task store
+    let knowledge_store = Arc::new(KnowledgeStore::new());
+    let a2a_task_store = Arc::new(A2ATaskStore::new());
+
     // CORS layer
     let cors = CorsLayer::new()
         .allow_origin(Any)
@@ -71,7 +83,7 @@ async fn main() {
 
     // Build application
     // Middleware stack (applied bottom-up):
-    //   CORS → Audit → RateLimit → Auth → Transform → Cache → [FHIR | OpenAPI | Health | Proxy]
+    //   CORS → Audit → RateLimit → Auth → Transform → Cache → [Routes]
     let app = axum::Router::new()
         // Health endpoints (no auth / no audit needed)
         .merge(health::router())
@@ -79,6 +91,12 @@ async fn main() {
         .merge(openapi::router())
         // FHIR R4 proxy (more specific, matched before catch-all)
         .merge(fhir::router())
+        // Sprint 3: Agent tools
+        .merge(agent_tools::router())
+        // Sprint 3: Knowledge sync
+        .merge(knowledge::router().with_state(knowledge_store.clone()))
+        // Sprint 3: A2A protocol
+        .merge(a2a::router().with_state(a2a_task_store.clone()))
         // Proxy all other routes to OpenEMR
         .merge(proxy::router())
         // Cache layer

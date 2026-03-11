@@ -11,8 +11,8 @@ use crate::config::Config;
 #[openapi(
     info(
         title = "Eir Gateway API",
-        version = "0.2.0",
-        description = "Rust API Gateway for OpenEMR — part of the Asgard AI Platform.\n\nProvides FHIR R4 proxy, response caching, rate limiting, and request transformation.",
+        version = "0.3.0",
+        description = "Rust API Gateway for OpenEMR — part of the Asgard AI Platform.\n\nProvides FHIR R4 proxy, response caching, rate limiting, request transformation, Bifrost agent tools, Mimir knowledge sync, and A2A protocol support.",
         contact(name = "MegaWiz", email = "paripol@megawiz.co"),
         license(name = "AGPL-3.0", url = "https://www.gnu.org/licenses/agpl-3.0.en.html"),
     ),
@@ -21,10 +21,21 @@ use crate::config::Config;
         health_check,
         readiness_check,
         fhir_proxy,
+        fhir_query,
+        patients_search,
+        clinical_summary,
+        mimir_webhook,
+        knowledge_status,
+        agent_card,
+        a2a_send_task,
+        a2a_get_task,
     ),
     tags(
         (name = "health", description = "Health check endpoints"),
         (name = "fhir", description = "FHIR R4 proxy endpoints"),
+        (name = "agent-tools", description = "Bifrost agent tool endpoints"),
+        (name = "knowledge", description = "Mimir knowledge sync endpoints"),
+        (name = "a2a", description = "A2A Agent-to-Agent protocol endpoints"),
         (name = "docs", description = "API documentation"),
     ),
 )]
@@ -91,6 +102,113 @@ async fn readiness_check() {}
 #[allow(dead_code)]
 async fn fhir_proxy() {}
 
+/// Query FHIR resources via natural language or structured parameters.
+#[utoipa::path(
+    post,
+    path = "/v1/fhir/query",
+    tag = "agent-tools",
+    responses(
+        (status = 200, description = "FHIR query results"),
+        (status = 502, description = "Upstream FHIR error"),
+    ),
+)]
+#[allow(dead_code)]
+async fn fhir_query() {}
+
+/// Search patients for agent workflows.
+#[utoipa::path(
+    get,
+    path = "/v1/patients/search",
+    tag = "agent-tools",
+    params(
+        ("name" = Option<String>, Query, description = "Patient name"),
+        ("birthdate" = Option<String>, Query, description = "Date of birth (YYYY-MM-DD)"),
+        ("identifier" = Option<String>, Query, description = "Patient identifier"),
+    ),
+    responses(
+        (status = 200, description = "Patient search results"),
+    ),
+)]
+#[allow(dead_code)]
+async fn patients_search() {}
+
+/// Aggregate clinical data for a patient.
+#[utoipa::path(
+    post,
+    path = "/v1/clinical/summary",
+    tag = "agent-tools",
+    responses(
+        (status = 200, description = "Clinical summary"),
+    ),
+)]
+#[allow(dead_code)]
+async fn clinical_summary() {}
+
+/// Receive knowledge update webhook from Mimir.
+#[utoipa::path(
+    post,
+    path = "/v1/webhooks/mimir",
+    tag = "knowledge",
+    responses(
+        (status = 200, description = "Webhook accepted"),
+    ),
+)]
+#[allow(dead_code)]
+async fn mimir_webhook() {}
+
+/// View knowledge sync status.
+#[utoipa::path(
+    get,
+    path = "/v1/knowledge/status",
+    tag = "knowledge",
+    responses(
+        (status = 200, description = "Knowledge sync status"),
+    ),
+)]
+#[allow(dead_code)]
+async fn knowledge_status() {}
+
+/// A2A Agent Card — describes Eir's capabilities.
+#[utoipa::path(
+    get,
+    path = "/.well-known/agent.json",
+    tag = "a2a",
+    responses(
+        (status = 200, description = "A2A Agent Card JSON"),
+    ),
+)]
+#[allow(dead_code)]
+async fn agent_card() {}
+
+/// Send a task to Eir via A2A protocol.
+#[utoipa::path(
+    post,
+    path = "/a2a/tasks/send",
+    tag = "a2a",
+    responses(
+        (status = 200, description = "Task created and processed"),
+        (status = 400, description = "Invalid task message"),
+    ),
+)]
+#[allow(dead_code)]
+async fn a2a_send_task() {}
+
+/// Get task status and messages.
+#[utoipa::path(
+    get,
+    path = "/a2a/tasks/{id}",
+    tag = "a2a",
+    params(
+        ("id" = String, Path, description = "Task ID"),
+    ),
+    responses(
+        (status = 200, description = "Task details"),
+        (status = 404, description = "Task not found"),
+    ),
+)]
+#[allow(dead_code)]
+async fn a2a_get_task() {}
+
 /// Renders the Scalar API documentation UI.
 async fn scalar_ui() -> axum::response::Html<String> {
     let html = r#"<!DOCTYPE html>
@@ -116,7 +234,7 @@ mod tests {
     fn test_openapi_spec_generation() {
         let spec = ApiDoc::openapi();
         assert_eq!(spec.info.title, "Eir Gateway API");
-        assert_eq!(spec.info.version, "0.2.0");
+        assert_eq!(spec.info.version, "0.3.0");
         assert!(!spec.paths.paths.is_empty());
     }
 
@@ -134,6 +252,29 @@ mod tests {
         let spec = ApiDoc::openapi();
         assert!(spec.paths.paths.contains_key("/healthz"));
         assert!(spec.paths.paths.contains_key("/readyz"));
+    }
+
+    #[test]
+    fn test_openapi_has_agent_tools_paths() {
+        let spec = ApiDoc::openapi();
+        assert!(spec.paths.paths.contains_key("/v1/fhir/query"));
+        assert!(spec.paths.paths.contains_key("/v1/patients/search"));
+        assert!(spec.paths.paths.contains_key("/v1/clinical/summary"));
+    }
+
+    #[test]
+    fn test_openapi_has_knowledge_paths() {
+        let spec = ApiDoc::openapi();
+        assert!(spec.paths.paths.contains_key("/v1/webhooks/mimir"));
+        assert!(spec.paths.paths.contains_key("/v1/knowledge/status"));
+    }
+
+    #[test]
+    fn test_openapi_has_a2a_paths() {
+        let spec = ApiDoc::openapi();
+        assert!(spec.paths.paths.contains_key("/.well-known/agent.json"));
+        assert!(spec.paths.paths.contains_key("/a2a/tasks/send"));
+        assert!(spec.paths.paths.contains_key("/a2a/tasks/{id}"));
     }
 
     #[test]

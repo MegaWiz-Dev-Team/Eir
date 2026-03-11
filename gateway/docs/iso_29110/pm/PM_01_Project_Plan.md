@@ -1,6 +1,6 @@
 # PM-01: Project Plan — Eir Gateway
 **Project Name:** Eir — Rust API Gateway for OpenEMR
-**Document Version:** 1.1
+**Document Version:** 1.2
 **Date:** 2026-03-12
 **Standard:** ISO/IEC 29110 — PM Process
 
@@ -22,6 +22,7 @@ Rust-based API Gateway ทำหน้าที่ reverse proxy หน้า Op
 | Caching | moka (async in-memory) |
 | Rate Limiting | governor (GCRA) |
 | API Docs | utoipa + Scalar UI |
+| Timestamps | chrono (ISO 8601) |
 
 ---
 
@@ -49,11 +50,15 @@ Rust-based API Gateway ทำหน้าที่ reverse proxy หน้า Op
 | OpenAPI docs (utoipa + Scalar UI) | ✅ Done |
 | Tests | ✅ Done (22 passed, 0 warnings) |
 
-### Sprint 3: Asgard Integration (Planned)
+### Sprint 3: Asgard Integration (Mar 12, 2026) — ✅ COMPLETED
 | Deliverable | Status |
 |:--|:--|
-| Bifrost agent tools | 📋 Planned |
-| Mimir knowledge sync | 📋 Planned |
+| Bifrost agent tools (FHIR query, patient search, clinical summary) | ✅ Done |
+| Mimir knowledge sync (webhook + status) | ✅ Done |
+| A2A protocol (Agent Card, task send/get) | ✅ Done |
+| OpenAPI v0.3.0 (12 documented endpoints) | ✅ Done |
+| Auth update (A2A public path) | ✅ Done |
+| Tests | ✅ Done (47 passed, 0 warnings) |
 
 ---
 
