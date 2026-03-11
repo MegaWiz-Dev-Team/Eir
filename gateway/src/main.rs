@@ -3,23 +3,35 @@
 //! Part of the Asgard AI Platform.
 //! Sits in front of OpenEMR PHP backend providing:
 //! - Reverse proxy with header forwarding
-//! - Bearer token authentication  
+//! - FHIR R4-aware proxy with FHIR-specific headers
+//! - In-memory response caching (moka)
+//! - Per-IP rate limiting (governor / GCRA)
+//! - Request transformation (tenant headers, path rewrite)
+//! - Bearer token authentication
 //! - Structured audit logging
 //! - Health check endpoints
+//! - OpenAPI documentation with Scalar UI
 //! - CORS support
 
 mod audit;
 mod auth;
+mod cache;
 mod config;
+mod fhir;
 mod health;
+mod openapi;
 mod proxy;
+mod rate_limit;
+mod transform;
 
 use axum::middleware;
 use std::sync::Arc;
 use tower_http::cors::{Any, CorsLayer};
 use tracing_subscriber::{fmt, EnvFilter};
 
+use crate::cache::ResponseCache;
 use crate::config::Config;
+use crate::rate_limit::RateLimiterState;
 
 #[tokio::main]
 async fn main() {
@@ -38,10 +50,18 @@ async fn main() {
         openemr_url = %config.openemr_url,
         listen_addr = %config.listen_addr,
         auth_enabled = config.auth_enabled,
-        "Starting Eir Gateway"
+        rate_limit_rps = config.rate_limit_rps,
+        cache_ttl_secs = config.cache_ttl_secs,
+        tenant_id = %config.tenant_id,
+        "Starting Eir Gateway v{}",
+        env!("CARGO_PKG_VERSION")
     );
 
     let shared_config = Arc::new(config.clone());
+
+    // Sprint 2 state: cache + rate limiter
+    let response_cache = Arc::new(ResponseCache::new(config.cache_ttl_secs));
+    let rate_limiter = Arc::new(RateLimiterState::new(config.rate_limit_rps));
 
     // CORS layer
     let cors = CorsLayer::new()
@@ -50,16 +70,46 @@ async fn main() {
         .allow_headers(Any);
 
     // Build application
+    // Middleware stack (applied bottom-up):
+    //   CORS → Audit → RateLimit → Auth → Transform → Cache → [FHIR | OpenAPI | Health | Proxy]
     let app = axum::Router::new()
         // Health endpoints (no auth / no audit needed)
         .merge(health::router())
+        // OpenAPI documentation
+        .merge(openapi::router())
+        // FHIR R4 proxy (more specific, matched before catch-all)
+        .merge(fhir::router())
         // Proxy all other routes to OpenEMR
         .merge(proxy::router())
-        // Middleware stack (applied bottom-up: audit first, then auth)
+        // Cache layer
+        .layer(middleware::from_fn_with_state(
+            response_cache.clone(),
+            |state: axum::extract::State<Arc<ResponseCache>>,
+             request: axum::extract::Request,
+             next: middleware::Next| async move {
+                cache::cache_middleware(state.0, request, next).await
+            },
+        ))
+        // Transform layer
+        .layer(middleware::from_fn_with_state(
+            shared_config.clone(),
+            transform::transform_middleware,
+        ))
+        // Auth layer
         .layer(middleware::from_fn_with_state(
             shared_config.clone(),
             auth::auth_middleware,
         ))
+        // Rate limit layer
+        .layer(middleware::from_fn_with_state(
+            rate_limiter.clone(),
+            |state: axum::extract::State<Arc<RateLimiterState>>,
+             request: axum::extract::Request,
+             next: middleware::Next| async move {
+                rate_limit::rate_limit_middleware(state.0, request, next).await
+            },
+        ))
+        // Audit logging layer
         .layer(middleware::from_fn(audit::audit_middleware))
         .layer(cors)
         .with_state(shared_config.clone());

@@ -12,7 +12,13 @@ use std::sync::Arc;
 use crate::config::Config;
 
 /// Paths that skip authentication.
-const PUBLIC_PATHS: [&str; 2] = ["/healthz", "/readyz"];
+const PUBLIC_PATHS: [&str; 5] = [
+    "/healthz",
+    "/readyz",
+    "/fhir/r4/metadata",
+    "/api-docs",
+    "/api-docs/openapi.json",
+];
 
 /// Auth middleware — validates Bearer token in Authorization header.
 pub async fn auth_middleware(

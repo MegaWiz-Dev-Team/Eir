@@ -1,7 +1,7 @@
 # PM-01: Project Plan — Eir Gateway
 **Project Name:** Eir — Rust API Gateway for OpenEMR
-**Document Version:** 1.0
-**Date:** 2026-03-11
+**Document Version:** 1.1
+**Date:** 2026-03-12
 **Standard:** ISO/IEC 29110 — PM Process
 
 ---
@@ -19,6 +19,9 @@ Rust-based API Gateway ทำหน้าที่ reverse proxy หน้า Op
 | HTTP client | reqwest (async) |
 | Logging | tracing + tracing-subscriber (JSON) |
 | Middleware | tower-http (CORS, trace) |
+| Caching | moka (async in-memory) |
+| Rate Limiting | governor (GCRA) |
+| API Docs | utoipa + Scalar UI |
 
 ---
 
@@ -36,12 +39,15 @@ Rust-based API Gateway ทำหน้าที่ reverse proxy หน้า Op
 | CORS middleware | ✅ Done |
 | Tests | ✅ Done (2 passed, 0 warnings) |
 
-### Sprint 2: FHIR Proxy + Enhancement (Planned)
+### Sprint 2: FHIR Proxy + Enhancement (Mar 12, 2026) — ✅ COMPLETED
 | Deliverable | Status |
 |:--|:--|
-| FHIR resource proxy (/fhir/r4/*) | 📋 Planned |
-| Response caching | 📋 Planned |
-| Rate limiting | 📋 Planned |
+| FHIR R4 proxy (/fhir/r4/*) | ✅ Done |
+| Response caching (moka) | ✅ Done |
+| Rate limiting (governor/GCRA) | ✅ Done |
+| Request transformation | ✅ Done |
+| OpenAPI docs (utoipa + Scalar UI) | ✅ Done |
+| Tests | ✅ Done (22 passed, 0 warnings) |
 
 ### Sprint 3: Asgard Integration (Planned)
 | Deliverable | Status |
@@ -52,3 +58,4 @@ Rust-based API Gateway ทำหน้าที่ reverse proxy หน้า Op
 ---
 
 *บันทึกโดย: AI Assistant (ตามมาตรฐาน ISO/IEC 29110 หมวด PM-01)*
+

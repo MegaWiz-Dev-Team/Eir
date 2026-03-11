@@ -15,6 +15,12 @@ pub struct Config {
     pub log_level: String,
     /// Whether auth is enabled
     pub auth_enabled: bool,
+    /// Rate limit: max requests per second per IP
+    pub rate_limit_rps: u32,
+    /// Cache TTL in seconds for GET responses
+    pub cache_ttl_secs: u64,
+    /// Tenant identifier for header injection
+    pub tenant_id: String,
 }
 
 impl Config {
@@ -38,6 +44,15 @@ impl Config {
                 .unwrap_or_else(|_| "false".to_string())
                 .parse()
                 .unwrap_or(false),
+            rate_limit_rps: env::var("RATE_LIMIT_RPS")
+                .unwrap_or_else(|_| "100".to_string())
+                .parse()
+                .unwrap_or(100),
+            cache_ttl_secs: env::var("CACHE_TTL_SECS")
+                .unwrap_or_else(|_| "60".to_string())
+                .parse()
+                .unwrap_or(60),
+            tenant_id: env::var("TENANT_ID").unwrap_or_else(|_| "default".to_string()),
         }
     }
 }
@@ -52,9 +67,16 @@ mod tests {
         env::remove_var("OPENEMR_URL");
         env::remove_var("GATEWAY_PORT");
         env::remove_var("AUTH_SECRET");
+        env::remove_var("RATE_LIMIT_RPS");
+        env::remove_var("CACHE_TTL_SECS");
+        env::remove_var("TENANT_ID");
         let config = Config::from_env();
         assert_eq!(config.openemr_url, "http://localhost:80");
         assert_eq!(config.listen_addr.port(), 9090);
         assert_eq!(config.log_level, "info");
+        assert_eq!(config.rate_limit_rps, 100);
+        assert_eq!(config.cache_ttl_secs, 60);
+        assert_eq!(config.tenant_id, "default");
     }
 }
+
