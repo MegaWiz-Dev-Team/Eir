@@ -1,4 +1,7 @@
-//! Auth middleware — Bearer token validation.
+//! Auth middleware — Zitadel JWKS-based JWT validation.
+//!
+//! Validates Bearer tokens against Zitadel's JWKS keys (RS256).
+//! Replaces the previous static secret comparison.
 
 use axum::{
     extract::{Request, State},
@@ -10,6 +13,7 @@ use serde_json::json;
 use std::sync::Arc;
 
 use crate::config::Config;
+use crate::jwks::JwksCache;
 
 /// Paths that skip authentication.
 const PUBLIC_PATHS: [&str; 6] = [
@@ -21,7 +25,15 @@ const PUBLIC_PATHS: [&str; 6] = [
     "/.well-known/agent.json",
 ];
 
-/// Auth middleware — validates Bearer token in Authorization header.
+/// Shared auth state: config + JWKS cache.
+#[derive(Clone)]
+#[allow(dead_code)]
+pub struct AuthState {
+    pub config: Arc<Config>,
+    pub jwks: Arc<JwksCache>,
+}
+
+/// Auth middleware — validates Bearer JWT via Zitadel JWKS.
 pub async fn auth_middleware(
     State(config): State<Arc<Config>>,
     request: Request,
@@ -47,13 +59,38 @@ pub async fn auth_middleware(
     match auth_header {
         Some(header) if header.starts_with("Bearer ") => {
             let token = &header[7..];
-            if token == config.auth_secret {
-                Ok(next.run(request).await)
-            } else {
-                Err((
-                    StatusCode::UNAUTHORIZED,
-                    Json(json!({"error": "Invalid token"})),
-                ))
+
+            // Fallback: accept static secret if JWKS issuer not configured
+            if config.zitadel_issuer.is_empty() {
+                if token == config.auth_secret {
+                    return Ok(next.run(request).await);
+                } else {
+                    return Err((
+                        StatusCode::UNAUTHORIZED,
+                        Json(json!({"error": "Invalid token"})),
+                    ));
+                }
+            }
+
+            // JWKS validation: create cache on-demand
+            // In production, this would be shared state — for now, validate signature + claims
+            let cache = JwksCache::new(&config.zitadel_issuer, config.jwt_audience.clone());
+            match cache.validate(token).await {
+                Ok(claims) => {
+                    tracing::debug!(
+                        sub = %claims.sub,
+                        org = ?claims.org_id,
+                        "JWT validated"
+                    );
+                    Ok(next.run(request).await)
+                }
+                Err(e) => {
+                    tracing::warn!("JWT validation failed: {}", e);
+                    Err((
+                        StatusCode::UNAUTHORIZED,
+                        Json(json!({"error": format!("Invalid token: {}", e)})),
+                    ))
+                }
             }
         }
         _ => Err((

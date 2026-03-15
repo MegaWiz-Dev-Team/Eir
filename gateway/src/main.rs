@@ -21,9 +21,11 @@ mod agent_tools;
 mod audit;
 mod auth;
 mod cache;
+mod chat;
 mod config;
 mod fhir;
 mod health;
+mod jwks;
 mod knowledge;
 mod openapi;
 mod proxy;
@@ -65,6 +67,11 @@ async fn main() {
         env!("CARGO_PKG_VERSION")
     );
 
+    tracing::info!(
+        bifrost_url = %config.bifrost_url,
+        "Bifrost agent target configured"
+    );
+
     let shared_config = Arc::new(config.clone());
 
     // Sprint 2 state: cache + rate limiter
@@ -97,6 +104,8 @@ async fn main() {
         .merge(knowledge::router().with_state(knowledge_store.clone()))
         // Sprint 3: A2A protocol
         .merge(a2a::router().with_state(a2a_task_store.clone()))
+        // Sprint 4: Chat interface
+        .merge(chat::router())
         // Proxy all other routes to OpenEMR
         .merge(proxy::router())
         // Cache layer

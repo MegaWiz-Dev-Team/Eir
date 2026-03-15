@@ -9,18 +9,24 @@ pub struct Config {
     pub openemr_url: String,
     /// Gateway listen address
     pub listen_addr: SocketAddr,
-    /// Auth secret for Bearer token validation
+    /// Auth secret for Bearer token validation (legacy fallback)
     pub auth_secret: String,
     /// Log level (e.g. "info", "debug", "warn")
     pub log_level: String,
     /// Whether auth is enabled
     pub auth_enabled: bool,
+    /// Zitadel issuer URL for JWKS validation (empty = use static auth_secret)
+    pub zitadel_issuer: String,
+    /// Expected JWT audience (optional)
+    pub jwt_audience: Option<String>,
     /// Rate limit: max requests per second per IP
     pub rate_limit_rps: u32,
     /// Cache TTL in seconds for GET responses
     pub cache_ttl_secs: u64,
     /// Tenant identifier for header injection
     pub tenant_id: String,
+    /// Bifrost agent runtime URL
+    pub bifrost_url: String,
 }
 
 impl Config {
@@ -44,6 +50,8 @@ impl Config {
                 .unwrap_or_else(|_| "false".to_string())
                 .parse()
                 .unwrap_or(false),
+            zitadel_issuer: env::var("ZITADEL_ISSUER").unwrap_or_default(),
+            jwt_audience: env::var("JWT_AUDIENCE").ok().filter(|s| !s.is_empty()),
             rate_limit_rps: env::var("RATE_LIMIT_RPS")
                 .unwrap_or_else(|_| "100".to_string())
                 .parse()
@@ -53,6 +61,8 @@ impl Config {
                 .parse()
                 .unwrap_or(60),
             tenant_id: env::var("TENANT_ID").unwrap_or_else(|_| "default".to_string()),
+            bifrost_url: env::var("BIFROST_URL")
+                .unwrap_or_else(|_| "http://bifrost:8100".to_string()),
         }
     }
 }
