@@ -2,7 +2,7 @@
 
 > Rust (Axum) API Gateway for OpenEMR with MCP Server, embedded Chat UI, and A2A agent protocol.
 
-**Part of [Asgard AI Platform](https://github.com/megacare-dev/Asgard)**
+**Part of [Asgard AI Platform](https://github.com/MegaWiz-Dev-Team/Asgard)**
 
 ## Features
 
