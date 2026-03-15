@@ -74,8 +74,19 @@ async fn proxy_handler(
     let status = StatusCode::from_u16(upstream_response.status().as_u16())
         .unwrap_or(StatusCode::INTERNAL_SERVER_ERROR);
 
+    let is_html = upstream_response
+        .headers()
+        .get("content-type")
+        .and_then(|v| v.to_str().ok())
+        .map(|ct| ct.contains("text/html"))
+        .unwrap_or(false);
+
     let mut response_headers = HeaderMap::new();
     for (name, value) in upstream_response.headers().iter() {
+        // Skip content-length since we may modify the body
+        if is_html && name == "content-length" {
+            continue;
+        }
         if let Ok(v) = HeaderValue::from_str(value.to_str().unwrap_or("")) {
             response_headers.insert(name.clone(), v);
         }
@@ -86,9 +97,22 @@ async fn proxy_handler(
         .await
         .map_err(|e| (StatusCode::BAD_GATEWAY, format!("Response body error: {e}")))?;
 
+    // Inject chat widget into HTML responses
+    let final_body = if is_html {
+        let html = String::from_utf8_lossy(&response_body);
+        if html.contains("</body>") {
+            let injected = crate::chat::inject_widget(&html);
+            Body::from(injected)
+        } else {
+            Body::from(response_body)
+        }
+    } else {
+        Body::from(response_body)
+    };
+
     let mut response = Response::builder()
         .status(status)
-        .body(Body::from(response_body))
+        .body(final_body)
         .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, format!("Response build error: {e}")))?;
 
     *response.headers_mut() = response_headers;

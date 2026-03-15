@@ -1,0 +1,47 @@
+##############################################
+# Eir Gateway — Multi-stage Rust build
+##############################################
+FROM rust:1.85-slim AS builder
+
+WORKDIR /app
+
+# Install dependencies
+RUN apt-get update && apt-get install -y pkg-config libssl-dev && rm -rf /var/lib/apt/lists/*
+
+# Cache dependencies: copy manifests first
+COPY gateway/Cargo.toml gateway/Cargo.lock ./
+RUN mkdir src && echo "fn main(){}" > src/main.rs && cargo build --release && rm -rf src
+
+# Build the actual source
+COPY gateway/src ./src
+COPY gateway/static ./static
+RUN touch src/main.rs && cargo build --release
+
+##############################################
+# Runtime — minimal image
+##############################################
+FROM debian:bookworm-slim
+
+RUN apt-get update && apt-get install -y ca-certificates curl && rm -rf /var/lib/apt/lists/*
+
+# Non-root user
+RUN groupadd -r eir && useradd -r -g eir eir
+
+COPY --from=builder /app/target/release/eir-gateway /usr/local/bin/eir-gateway
+
+USER eir
+EXPOSE 8300
+
+ENV GATEWAY_HOST=0.0.0.0
+ENV GATEWAY_PORT=8300
+ENV OPENEMR_URL=http://eir:80
+ENV AUTH_ENABLED=false
+ENV LOG_LEVEL=info
+ENV RATE_LIMIT_RPS=100
+ENV CACHE_TTL_SECS=60
+ENV TENANT_ID=default
+
+HEALTHCHECK --interval=10s --timeout=3s --retries=3 \
+  CMD curl -f http://localhost:8300/healthz || exit 1
+
+ENTRYPOINT ["eir-gateway"]

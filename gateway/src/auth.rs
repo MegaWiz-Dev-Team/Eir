@@ -1,6 +1,6 @@
-//! Auth middleware — Zitadel JWKS-based JWT validation.
+//! Auth middleware — Yggdrasil JWKS-based JWT validation.
 //!
-//! Validates Bearer tokens against Zitadel's JWKS keys (RS256).
+//! Validates Bearer tokens against Yggdrasil's JWKS keys (RS256).
 //! Replaces the previous static secret comparison.
 
 use axum::{
@@ -33,7 +33,7 @@ pub struct AuthState {
     pub jwks: Arc<JwksCache>,
 }
 
-/// Auth middleware — validates Bearer JWT via Zitadel JWKS.
+/// Auth middleware — validates Bearer JWT via Yggdrasil JWKS.
 pub async fn auth_middleware(
     State(config): State<Arc<Config>>,
     request: Request,
@@ -61,7 +61,7 @@ pub async fn auth_middleware(
             let token = &header[7..];
 
             // Fallback: accept static secret if JWKS issuer not configured
-            if config.zitadel_issuer.is_empty() {
+            if config.yggdrasil_issuer.is_empty() {
                 if token == config.auth_secret {
                     return Ok(next.run(request).await);
                 } else {
@@ -74,7 +74,7 @@ pub async fn auth_middleware(
 
             // JWKS validation: create cache on-demand
             // In production, this would be shared state — for now, validate signature + claims
-            let cache = JwksCache::new(&config.zitadel_issuer, config.jwt_audience.clone());
+            let cache = JwksCache::new(&config.yggdrasil_issuer, config.jwt_audience.clone());
             match cache.validate(token).await {
                 Ok(claims) => {
                     tracing::debug!(

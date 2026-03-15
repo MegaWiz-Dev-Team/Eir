@@ -1,13 +1,13 @@
 # Release Notes — Eir (API Gateway)
 
-## v0.4.0 — Zitadel JWKS Auth (2026-03-15)
+## v0.4.0 — Yggdrasil JWKS Auth (2026-03-15)
 
 ### 🔒 Security
 - **JWKS-based JWT validation** — replaces static Bearer token
-- `JwksCache` fetches + caches RS256 keys from Zitadel
-- `ZitadelClaims` extracts `sub`, `org_id`, `roles` from tokens
-- Fallback to static `AUTH_SECRET` when `ZITADEL_ISSUER` is empty
-- New config: `ZITADEL_ISSUER`, `JWT_AUDIENCE`
+- `JwksCache` fetches + caches RS256 keys from Yggdrasil
+- `YggdrasilClaims` extracts `sub`, `org_id`, `roles` from tokens
+- Fallback to static `AUTH_SECRET` when `YGGDRASIL_ISSUER` is empty
+- New config: `YGGDRASIL_ISSUER`, `JWT_AUDIENCE`
 
 ### 📊 Stats
 - **57 tests**, all passing (0.21s)

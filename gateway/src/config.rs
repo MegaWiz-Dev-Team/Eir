@@ -15,8 +15,8 @@ pub struct Config {
     pub log_level: String,
     /// Whether auth is enabled
     pub auth_enabled: bool,
-    /// Zitadel issuer URL for JWKS validation (empty = use static auth_secret)
-    pub zitadel_issuer: String,
+    /// Yggdrasil issuer URL for JWKS validation (empty = use static auth_secret)
+    pub yggdrasil_issuer: String,
     /// Expected JWT audience (optional)
     pub jwt_audience: Option<String>,
     /// Rate limit: max requests per second per IP
@@ -50,7 +50,7 @@ impl Config {
                 .unwrap_or_else(|_| "false".to_string())
                 .parse()
                 .unwrap_or(false),
-            zitadel_issuer: env::var("ZITADEL_ISSUER").unwrap_or_default(),
+            yggdrasil_issuer: env::var("YGGDRASIL_ISSUER").unwrap_or_default(),
             jwt_audience: env::var("JWT_AUDIENCE").ok().filter(|s| !s.is_empty()),
             rate_limit_rps: env::var("RATE_LIMIT_RPS")
                 .unwrap_or_else(|_| "100".to_string())

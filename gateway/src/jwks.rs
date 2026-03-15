@@ -1,6 +1,6 @@
-//! JWKS-based JWT validation for Zitadel tokens.
+//! JWKS-based JWT validation for Yggdrasil tokens.
 //!
-//! Fetches JSON Web Key Set from Zitadel's OIDC discovery endpoint,
+//! Fetches JSON Web Key Set from Yggdrasil's OIDC discovery endpoint,
 //! caches keys, and validates RS256 JWT signatures.
 
 use jsonwebtoken::{decode, decode_header, Algorithm, DecodingKey, Validation};
@@ -11,18 +11,18 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 use tokio::sync::RwLock;
 
-/// Claims extracted from a validated Zitadel JWT.
+/// Claims extracted from a validated Yggdrasil JWT.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ZitadelClaims {
+pub struct YggdrasilClaims {
     pub sub: String,
     pub iss: String,
     pub aud: Option<serde_json::Value>,
     pub exp: u64,
     pub iat: Option<u64>,
-    /// Zitadel organization ID (tenant)
+    /// Yggdrasil organization ID (tenant)
     #[serde(rename = "urn:zitadel:iam:org:id")]
     pub org_id: Option<String>,
-    /// Zitadel project roles
+    /// Yggdrasil project roles
     #[serde(rename = "urn:zitadel:iam:org:project:roles")]
     pub roles: Option<serde_json::Value>,
 }
@@ -39,7 +39,7 @@ struct Jwk {
     alg: Option<String>,
 }
 
-/// JWKS response from Zitadel.
+/// JWKS response from Yggdrasil.
 #[derive(Debug, Deserialize)]
 struct JwksResponse {
     keys: Vec<Jwk>,
@@ -56,7 +56,7 @@ pub struct JwksCache {
 }
 
 impl JwksCache {
-    /// Create a new JWKS cache for the given Zitadel issuer.
+    /// Create a new JWKS cache for the given Yggdrasil issuer.
     pub fn new(issuer: &str, audience: Option<String>) -> Self {
         Self {
             issuer: issuer.trim_end_matches('/').to_string(),
@@ -71,7 +71,7 @@ impl JwksCache {
         }
     }
 
-    /// Fetch JWKS from Zitadel's discovery endpoint.
+    /// Fetch JWKS from Yggdrasil's discovery endpoint.
     async fn refresh_keys(&self) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         let jwks_url = format!("{}/.well-known/keys", self.issuer);
         tracing::debug!("Fetching JWKS from {}", jwks_url);
@@ -115,7 +115,7 @@ impl JwksCache {
     pub async fn validate(
         &self,
         token: &str,
-    ) -> Result<ZitadelClaims, Box<dyn std::error::Error + Send + Sync>> {
+    ) -> Result<YggdrasilClaims, Box<dyn std::error::Error + Send + Sync>> {
         // Refresh if needed
         if self.needs_refresh().await {
             self.refresh_keys().await?;
@@ -143,7 +143,7 @@ impl JwksCache {
             validation.validate_aud = false;
         }
 
-        let token_data = decode::<ZitadelClaims>(token, key, &validation)?;
+        let token_data = decode::<YggdrasilClaims>(token, key, &validation)?;
         Ok(token_data.claims)
     }
 }
@@ -163,7 +163,7 @@ mod tests {
             "urn:zitadel:iam:org:id": "org-abc",
             "urn:zitadel:iam:org:project:roles": {"admin": {"org-abc": "org-abc"}}
         }"#;
-        let claims: ZitadelClaims = serde_json::from_str(json_str).unwrap();
+        let claims: YggdrasilClaims = serde_json::from_str(json_str).unwrap();
         assert_eq!(claims.sub, "user-123");
         assert_eq!(claims.iss, "http://localhost:8085");
         assert_eq!(claims.org_id, Some("org-abc".to_string()));
@@ -177,7 +177,7 @@ mod tests {
             "iss": "http://localhost:8085",
             "exp": 9999999999
         }"#;
-        let claims: ZitadelClaims = serde_json::from_str(json_str).unwrap();
+        let claims: YggdrasilClaims = serde_json::from_str(json_str).unwrap();
         assert_eq!(claims.sub, "svc-account");
         assert!(claims.org_id.is_none());
         assert!(claims.roles.is_none());
