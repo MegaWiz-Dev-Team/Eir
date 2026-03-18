@@ -64,3 +64,11 @@ Rust-based API Gateway ทำหน้าที่ reverse proxy หน้า Op
 
 *บันทึกโดย: AI Assistant (ตามมาตรฐาน ISO/IEC 29110 หมวด PM-01)*
 
+- **Sprint 31: Mimir Hybrid Search & MCP Server Foundation** [Planned]
+  - True Vector Integration, Parallel Tree Search, Neo4j Graph, Ensemble Retrieval, and Rust MCP Server.
+- **Sprint 32: Asgard/Bifrost MCP Adapter & Dynamic Tenants** [Planned]
+  - Auto-discover tools from MCP servers, Dynamic Context Isolation (X-Tenant-ID), Agent-to-Agent via JSON-RPC.
+- **Sprint 33: Ecosystem Gateway Sidecars** [Planned]
+  - Yggdrasil & Eir Universal Go Sidecars to expose auth and medical tools to Asgard.
+- **Sprint 34: Platform Automation (Testing, Browsing & Security)** [Planned]
+  - Deploy MCP across Fenrir, Forseti, Ratatoskr, Huginn, Muninn, and Heimdall.
