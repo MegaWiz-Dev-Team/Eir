@@ -34,3 +34,10 @@ RestConfig::$ROUTE_MAP = require_once __DIR__ . "/apis/routes/_rest_routes_stand
 RestConfig::$FHIR_ROUTE_MAP = require_once __DIR__ . "/apis/routes/_rest_routes_fhir_r4_us_core_3_1_0.inc.php";
 
 RestConfig::$PORTAL_ROUTE_MAP = require_once __DIR__ . "/apis/routes/_rest_routes_portal.inc.php";
+
+// Custom Eir routes — CPAP data sync from Mega Care
+RestConfig::$ROUTE_MAP["POST /api/cpap-sync"] = function () {
+    $data = json_decode(file_get_contents("php://input"), true) ?? [];
+    $controller = new \OpenEMR\RestControllers\CpapSyncRestController();
+    return $controller->sync($data);
+};

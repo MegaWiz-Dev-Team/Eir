@@ -25,7 +25,8 @@
 | FHIR proxy, moka cache, rate limit, OpenAPI | S2 | P0 |
 | Bifrost Agent Tools, Mimir Knowledge Sync, A2A | S3 | P0 |
 | Yggdrasil JWKS Auth (RS256) | S4 | P0 |
-| MCP Server (FHIR tools) + Embedded Chat UI | S5 | P1 |
+| 🔴 PDPA Consent Remediation & Data Migration Prep | S5 | P0 |
+| MCP Server (FHIR tools) + Embedded Chat UI | S6 | P1 |
 
 ---
 
@@ -88,7 +89,8 @@ src/
 | **S2** | 2 wk | FHIR R4 proxy, moka cache, rate limit, OpenAPI | 22 | ✅ Done |
 | **S3** | 2 wk | Bifrost Agent Tools, Mimir Sync, A2A Protocol | 47 | ✅ Done (2026-03-12) |
 | **S4** | 2 wk | Yggdrasil JWKS Auth (RS256) | 57 | ✅ Done (2026-03-15) |
-| **S5** | 2 wk | MCP Server (FHIR tools), Embedded Chat UI | — | 📋 Planned |
+| **S5** | 4 days | 🔴 PDPA Consent Gate, e-Consent, Migration Prep | — | 🏃 In Progress (2026-03-22) |
+| **S6** | 2 wk | MCP Server (FHIR tools), Embedded Chat UI | — | 📋 Planned |
 
 ---
 
@@ -123,6 +125,8 @@ src/
 | JWKS key rotation | Medium | 1-hour cache refresh, fallback to static token |
 | OpenEMR API breaking changes | Medium | Pin Docker image version, integration tests |
 | PHI exposure in chat widget | High | Auth required, audit log all chat interactions |
+| 🔴 PDPA: No patient consent obtained | Critical | Sprint 5 — Consent Gate + e-Consent + Retroactive Campaign |
+| Clinical data leakage from Mega Care | High | Sprint 5 — Archive Plan + RBAC lockdown |
 
 ---
 
