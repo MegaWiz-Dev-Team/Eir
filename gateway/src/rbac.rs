@@ -100,6 +100,12 @@ pub async fn rbac_middleware(
         return Ok(next.run(request).await);
     }
 
+    // Allow GET /v1/chat/status unauthenticated — it only reports Bifrost reachability,
+    // contains no patient data, and is needed for the widget health indicator.
+    if path == "/v1/chat/status" && method == "GET" {
+        return Ok(next.run(request).await);
+    }
+
     let role = extract_role(&request);
 
     tracing::debug!(
