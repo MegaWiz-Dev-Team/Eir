@@ -95,14 +95,10 @@ pub async fn rbac_middleware(
     let path = request.uri().path().to_string();
     let method = request.method().as_str().to_string();
 
-    // Only enforce RBAC on /api/patients and /v1/chat paths
-    if !path.starts_with("/api/patients") && !path.starts_with("/v1/chat") {
-        return Ok(next.run(request).await);
-    }
-
-    // Allow GET /v1/chat/status unauthenticated — it only reports Bifrost reachability,
-    // contains no patient data, and is needed for the widget health indicator.
-    if path == "/v1/chat/status" && method == "GET" {
+    // Only enforce RBAC on /api/patients paths (direct clinical data access).
+    // Chat endpoints (/v1/chat) are NOT guarded here — they proxy to Bifrost
+    // which handles its own authorization semantics downstream.
+    if !path.starts_with("/api/patients") {
         return Ok(next.run(request).await);
     }
 
