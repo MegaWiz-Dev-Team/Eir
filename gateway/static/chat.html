@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eir Chat — Asgard AI</title>
+    <title>Eir Chat</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -426,10 +426,10 @@
     <!-- Header -->
     <div class="header">
         <div class="header-left">
-            <div class="header-logo">🐺</div>
+            <div class="header-logo">⚕️</div>
             <div>
                 <h1>Eir Chat</h1>
-                <div class="header-subtitle">Asgard AI — Fenrir Agent Interface</div>
+                <div class="header-subtitle">Asgard AI Medical Assistant</div>
             </div>
         </div>
         <div class="header-right">
@@ -472,9 +472,9 @@
         <!-- Messages -->
         <div class="messages" id="messages">
             <div class="welcome">
-                <div class="welcome-icon">🐺</div>
-                <h2>สั่งการ Fenrir ผ่าน Eir</h2>
-                <p>พิมพ์คำสั่งเป็นภาษาไทยหรืออังกฤษ เช่น ค้นหาคนไข้, ดู clinical summary, หรือสั่งให้ลงทะเบียนคนไข้ใหม่</p>
+                <div class="welcome-icon">⚕️</div>
+                <h2>สวัสดี ฉันคือ Eir AI</h2>
+                <p>ผู้ช่วยแพทย์ AI จาก Asgard — พิมพ์คำถามหรือคำสั่งได้เลย เช่น ค้นหาคนไข้, ดู clinical summary หรือตรวจสอบนัดหมาย</p>
             </div>
         </div>
 
@@ -546,7 +546,7 @@
             if (welcome) welcome.remove();
             const div = document.createElement('div');
             div.className = `message ${role}`;
-            const avatar = role === 'user' ? '👤' : '🐺';
+            const avatar = role === 'user' ? '👤' : '⚕️';
             div.innerHTML = `
                 <div class="message-avatar">${avatar}</div>
                 <div class="message-bubble">${escapeHtml(content)}</div>
@@ -563,7 +563,7 @@
             div.className = 'message agent';
             div.id = 'streaming-msg';
             div.innerHTML = `
-                <div class="message-avatar">🐺</div>
+                <div class="message-avatar">⚕️</div>
                 <div class="message-bubble">
                     <div class="typing-indicator"><span></span><span></span><span></span></div>
                 </div>
@@ -663,9 +663,9 @@
         function clearChat() {
             messagesEl.innerHTML = `
                 <div class="welcome">
-                    <div class="welcome-icon">🐺</div>
-                    <h2>สั่งการ Fenrir ผ่าน Eir</h2>
-                    <p>พิมพ์คำสั่งเป็นภาษาไทยหรืออังกฤษ เช่น ค้นหาคนไข้, ดู clinical summary, หรือสั่งให้ลงทะเบียนคนไข้ใหม่</p>
+                    <div class="welcome-icon">⚕️</div>
+                    <h2>สวัสดี ฉันคือ Eir AI</h2>
+                    <p>ผู้ช่วยแพทย์ AI จาก Asgard — พิมพ์คำถามหรือคำสั่งได้เลย</p>
                 </div>
             `;
         }

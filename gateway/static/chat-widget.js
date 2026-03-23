@@ -1,6 +1,7 @@
 /* ═══════════════════════════════════════
-   🐺 Eir Chat Widget — Embedded in OpenEMR
+   ⚕️ Eir Chat Widget — Embedded in OpenEMR
    Injected by Eir Gateway into proxied pages
+   Powered by Asgard AI
    ═══════════════════════════════════════ */
 
 (function() {
@@ -125,8 +126,8 @@
     // ── Floating Action Button ──
     const fab = document.createElement('button');
     fab.id = 'eir-chat-fab';
-    fab.innerHTML = '🐺';
-    fab.title = 'Eir Chat — สั่งการ Fenrir';
+    fab.innerHTML = '⚕️';
+    fab.title = 'Eir Chat — Asgard AI Medical Assistant';
 
     const badge = document.createElement('div');
     badge.id = 'eir-chat-badge';
@@ -159,7 +160,7 @@
         } else {
             panel.classList.remove('visible');
             fab.classList.remove('open');
-            fab.innerHTML = '🐺';
+            fab.innerHTML = '⚕️';
             fab.appendChild(badge);
         }
     });
