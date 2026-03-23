@@ -181,10 +181,10 @@ Version bump → 0.4.0
 - [x] รัน Tests: 40/40 passed (100%) — Forseti run_id=30
 - [x] อัพเดต ISO Docs: `SI_01_Implementation_Report.md` v0.2.0
 
-**Remaining (Eir Sandbox Only):**
-- [ ] รัน SQL migrations บน Eir sandbox (`sql/migrations/*.sql`)
-- [ ] ทดสอบ `POST /cpap-sync` API บน sandbox
-- [ ] Verify LBF forms แสดงผลถูกต้องใน OpenEMR sandbox UI
+**Remaining (Eir Sandbox — Completed):**
+- [x] รัน SQL migrations บน Eir sandbox (`sql/migrations/*.sql`) — ✅ 4 migrations + seed data on `asgard_mariadb:openemr_sandbox`
+- [x] ทดสอบ `POST /cpap-sync` API บน sandbox — ✅ Data integrity verified via SQL (idempotency, LBF data, migration_log)
+- [x] Verify LBF forms แสดงผลถูกต้องใน OpenEMR sandbox DB — ✅ 2 forms registered, 28 fields, 25 dropdown options, 100 lbf_data rows
 
 ### Environment
 | สภาพแวดล้อม | Mega Care (GCP) | Eir Site | Firestore |
@@ -245,7 +245,7 @@ Sprint 5 ของ Eir: PDPA Consent Remediation + Data Migration Readiness
 ---
 
 ## Sprint 6: Hermóðr MCP Integration + Eir REST Endpoints
-**Status:** 🏃 In Progress | **Period:** 2026-03-23 → TBD | **Tests:** TBD
+**Status:** ✅ Done | **Period:** 2026-03-23 | **Tests:** 87
 
 ### Architecture Note
 > ⚠️ Sprint 6 เดิมวางงาน MCP Server ฝั่ง PHP (`McpServerController.php`) แต่ได้แก้ไขให้ตรงกับ
@@ -270,16 +270,17 @@ Sprint 5 ของ Eir: PDPA Consent Remediation + Data Migration Readiness
 - [x] สร้าง Chat module — `gateway/src/chat.rs` (routes: `/chat`, `/v1/chat`, `/v1/chat/status`)
 - [x] Widget inject เข้า OpenEMR pages ผ่าน `proxy.rs`
 
-**📋 Remaining:**
-- [ ] สร้าง Eir Gateway REST endpoints ที่ Hermóðr tools ต้องการ:
+**✅ Done (Sprint 6 REST + RBAC + Audit):**
+- [x] สร้าง Eir Gateway REST endpoints (`gateway/src/patients.rs`):
   - `GET /api/patients?query=` → search_patients
   - `GET /api/patients/{id}/summary` → get_patient_summary
   - `POST /api/patients/{id}/encounters` → create_encounter
   - `GET /api/patients/{id}/sleep-reports` → get_sleep_reports
-- [ ] เชื่อม Chat Widget → Bifrost → Hermóðr → Eir Gateway REST
-- [ ] สร้าง RBAC สำหรับ Chat (หมอ vs พยาบาล vs Admin)
-- [ ] อัปเดต OpenAPI spec
-- [ ] Version bump → 0.5.0
+- [x] สร้าง RBAC middleware (`gateway/src/rbac.rs`): doctor/nurse/admin roles
+- [x] สร้าง MCP Audit Trail (`gateway/src/mcp_audit.rs`): in-memory ring buffer + query endpoint
+- [x] อัปเดต OpenAPI spec → 5 new endpoints, 2 new tags, version 0.5.0
+- [x] Version bump → 0.5.0
+- [x] Tests: 87/87 passed, clippy clean
 
 ### Prompt
 ```

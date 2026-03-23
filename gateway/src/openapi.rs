@@ -11,8 +11,8 @@ use crate::config::Config;
 #[openapi(
     info(
         title = "Eir Gateway API",
-        version = "0.3.0",
-        description = "Rust API Gateway for OpenEMR — part of the Asgard AI Platform.\n\nProvides FHIR R4 proxy, response caching, rate limiting, request transformation, Bifrost agent tools, Mimir knowledge sync, and A2A protocol support.",
+        version = "0.5.0",
+        description = "Rust API Gateway for OpenEMR — part of the Asgard AI Platform.\n\nProvides FHIR R4 proxy, response caching, rate limiting, request transformation, Bifrost agent tools, Mimir knowledge sync, A2A protocol, Hermóðr MCP patient endpoints, role-based access control, and MCP audit trail.",
         contact(name = "MegaWiz", email = "paripol@megawiz.co"),
         license(name = "AGPL-3.0", url = "https://www.gnu.org/licenses/agpl-3.0.en.html"),
     ),
@@ -29,6 +29,11 @@ use crate::config::Config;
         agent_card,
         a2a_send_task,
         a2a_get_task,
+        patients_search_api,
+        patient_summary,
+        patient_create_encounter,
+        patient_sleep_reports,
+        mcp_audit_query,
     ),
     tags(
         (name = "health", description = "Health check endpoints"),
@@ -36,6 +41,8 @@ use crate::config::Config;
         (name = "agent-tools", description = "Bifrost agent tool endpoints"),
         (name = "knowledge", description = "Mimir knowledge sync endpoints"),
         (name = "a2a", description = "A2A Agent-to-Agent protocol endpoints"),
+        (name = "patients", description = "Hermóðr MCP patient endpoints (Sprint 6)"),
+        (name = "audit", description = "MCP audit trail endpoints"),
         (name = "docs", description = "API documentation"),
     ),
 )]
@@ -209,6 +216,87 @@ async fn a2a_send_task() {}
 #[allow(dead_code)]
 async fn a2a_get_task() {}
 
+/// Search patients by name, DOB, or identifier (Hermóðr search_patients tool).
+#[utoipa::path(
+    get,
+    path = "/api/patients",
+    tag = "patients",
+    params(
+        ("query" = Option<String>, Query, description = "Search query: name, DOB, or PID"),
+    ),
+    responses(
+        (status = 200, description = "Patient search results"),
+        (status = 403, description = "Insufficient role permissions"),
+    ),
+)]
+#[allow(dead_code)]
+async fn patients_search_api() {}
+
+/// Get comprehensive patient summary with demographics, CPAP, and sleep data.
+#[utoipa::path(
+    get,
+    path = "/api/patients/{id}/summary",
+    tag = "patients",
+    params(
+        ("id" = String, Path, description = "Patient PID"),
+    ),
+    responses(
+        (status = 200, description = "Patient summary"),
+        (status = 403, description = "Insufficient role permissions"),
+    ),
+)]
+#[allow(dead_code)]
+async fn patient_summary() {}
+
+/// Create a new clinical encounter for a patient.
+#[utoipa::path(
+    post,
+    path = "/api/patients/{id}/encounters",
+    tag = "patients",
+    params(
+        ("id" = String, Path, description = "Patient PID"),
+    ),
+    responses(
+        (status = 200, description = "Encounter created"),
+        (status = 403, description = "Insufficient role permissions (nurse/admin blocked)"),
+    ),
+)]
+#[allow(dead_code)]
+async fn patient_create_encounter() {}
+
+/// Get sleep therapy reports for a patient.
+#[utoipa::path(
+    get,
+    path = "/api/patients/{id}/sleep-reports",
+    tag = "patients",
+    params(
+        ("id" = String, Path, description = "Patient PID"),
+        ("days" = Option<i32>, Query, description = "Days to look back (default: 30)"),
+    ),
+    responses(
+        (status = 200, description = "Sleep report data"),
+        (status = 403, description = "Insufficient role permissions"),
+    ),
+)]
+#[allow(dead_code)]
+async fn patient_sleep_reports() {}
+
+/// Query MCP audit trail entries.
+#[utoipa::path(
+    get,
+    path = "/v1/audit/mcp",
+    tag = "audit",
+    params(
+        ("limit" = Option<usize>, Query, description = "Max entries to return (default: 50)"),
+        ("user" = Option<String>, Query, description = "Filter by user ID"),
+    ),
+    responses(
+        (status = 200, description = "Audit trail entries"),
+    ),
+)]
+#[allow(dead_code)]
+async fn mcp_audit_query() {}
+
 /// Renders the Scalar API documentation UI.
 async fn scalar_ui() -> axum::response::Html<String> {
     let html = r#"<!DOCTYPE html>
@@ -234,7 +322,7 @@ mod tests {
     fn test_openapi_spec_generation() {
         let spec = ApiDoc::openapi();
         assert_eq!(spec.info.title, "Eir Gateway API");
-        assert_eq!(spec.info.version, "0.3.0");
+        assert_eq!(spec.info.version, "0.5.0");
         assert!(!spec.paths.paths.is_empty());
     }
 
@@ -275,6 +363,21 @@ mod tests {
         assert!(spec.paths.paths.contains_key("/.well-known/agent.json"));
         assert!(spec.paths.paths.contains_key("/a2a/tasks/send"));
         assert!(spec.paths.paths.contains_key("/a2a/tasks/{id}"));
+    }
+
+    #[test]
+    fn test_openapi_has_patient_tools_paths() {
+        let spec = ApiDoc::openapi();
+        assert!(spec.paths.paths.contains_key("/api/patients"));
+        assert!(spec.paths.paths.contains_key("/api/patients/{id}/summary"));
+        assert!(spec.paths.paths.contains_key("/api/patients/{id}/encounters"));
+        assert!(spec.paths.paths.contains_key("/api/patients/{id}/sleep-reports"));
+    }
+
+    #[test]
+    fn test_openapi_has_audit_path() {
+        let spec = ApiDoc::openapi();
+        assert!(spec.paths.paths.contains_key("/v1/audit/mcp"));
     }
 
     #[test]

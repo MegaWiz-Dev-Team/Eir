@@ -15,6 +15,9 @@
 //! - Bifrost agent tool endpoints (Sprint 3)
 //! - Mimir knowledge sync webhooks (Sprint 3)
 //! - A2A protocol support (Sprint 3)
+//! - Hermóðr MCP patient endpoints (Sprint 6)
+//! - RBAC role-based access control (Sprint 6)
+//! - MCP audit trail (Sprint 6)
 
 mod a2a;
 mod agent_tools;
@@ -27,9 +30,12 @@ mod fhir;
 mod health;
 mod jwks;
 mod knowledge;
+mod mcp_audit;
 mod openapi;
+mod patients;
 mod proxy;
 mod rate_limit;
+mod rbac;
 mod transform;
 
 use axum::middleware;
@@ -41,6 +47,7 @@ use crate::a2a::A2ATaskStore;
 use crate::cache::ResponseCache;
 use crate::config::Config;
 use crate::knowledge::KnowledgeStore;
+use crate::mcp_audit::AuditStore;
 use crate::rate_limit::RateLimiterState;
 
 #[tokio::main]
@@ -82,6 +89,9 @@ async fn main() {
     let knowledge_store = Arc::new(KnowledgeStore::new());
     let a2a_task_store = Arc::new(A2ATaskStore::new());
 
+    // Sprint 6 state: MCP audit store
+    let audit_store = Arc::new(AuditStore::new());
+
     // CORS layer
     let cors = CorsLayer::new()
         .allow_origin(Any)
@@ -106,6 +116,10 @@ async fn main() {
         .merge(a2a::router().with_state(a2a_task_store.clone()))
         // Sprint 4: Chat interface
         .merge(chat::router())
+        // Sprint 6: Hermóðr patient endpoints
+        .merge(patients::router())
+        // Sprint 6: MCP audit query endpoint
+        .merge(mcp_audit::router().with_state(audit_store.clone()))
         // Proxy all other routes to OpenEMR
         .merge(proxy::router())
         // Cache layer
@@ -117,6 +131,13 @@ async fn main() {
                 cache::cache_middleware(state.0, request, next).await
             },
         ))
+        // Sprint 6: MCP audit trail layer
+        .layer(middleware::from_fn_with_state(
+            audit_store.clone(),
+            mcp_audit::mcp_audit_middleware,
+        ))
+        // Sprint 6: RBAC layer
+        .layer(middleware::from_fn(rbac::rbac_middleware))
         // Transform layer
         .layer(middleware::from_fn_with_state(
             shared_config.clone(),
