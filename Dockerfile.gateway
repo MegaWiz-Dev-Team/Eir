@@ -1,7 +1,7 @@
 ##############################################
 # Eir Gateway — Multi-stage Rust build
 ##############################################
-FROM rust:1.85-slim AS builder
+FROM rust:slim-bookworm AS builder
 
 WORKDIR /app
 
@@ -42,6 +42,6 @@ ENV CACHE_TTL_SECS=60
 ENV TENANT_ID=default
 
 HEALTHCHECK --interval=10s --timeout=3s --retries=3 \
-  CMD curl -f http://localhost:8300/healthz || exit 1
+  CMD curl -f http://localhost:8300/api/health || exit 1
 
 ENTRYPOINT ["eir-gateway"]

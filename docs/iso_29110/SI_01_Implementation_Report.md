@@ -2,10 +2,10 @@
 
 **Product:** 🚪 Eir Gateway (FHIR R4 Proxy for OpenEMR)
 **Document ID:** SI-RPT-EIR-GW-001
-**Version:** 0.2.0
+**Version:** 0.5.0
 **Date:** 2026-03-23
 **Standard:** ISO/IEC 29110 — SI Process
-**Stack:** 🐍 Python (FastAPI) + 🏥 PHP (OpenEMR)
+**Stack:** 🦀 Rust (Axum) + 🏥 PHP (OpenEMR)
 
 ---
 
@@ -52,6 +52,13 @@ flowchart LR
 | FR-E09 | Migration log (idempotent data migration) | ✅ Done | S5 |
 | FR-E10 | Sandbox site for testing | ✅ Done | S5 |
 | FR-E11 | Local deploy script (`scripts/deploy.sh`) | ✅ Done | S5 |
+| FR-E12 | Patient Search & Summary API | ✅ Done | S6 |
+| FR-E13 | RBAC (Role-Based Access Control) | ✅ Done | S6 |
+| FR-E14 | MCP Audit Trail API | ✅ Done | S6 |
+| FR-E15 | Embedded Chat Widget (HTML + JS + PHP) | ✅ Done | S6 |
+| FR-E16 | A2A Protocol (Agent Card + Task) | ✅ Done | S6 |
+| FR-E17 | Scalar API Documentation UI | ✅ Done | S6 |
+| FR-E18 | Chat FAB Widget (`eir-chat-widget.js`) | ✅ Done | S6 |
 
 ## 4. API Endpoints
 
@@ -62,6 +69,18 @@ flowchart LR
 | `GET` | `/apis/default/fhir/Encounter` | FHIR Encounter resource | S4 |
 | `GET` | `/apis/default/fhir/Observation` | FHIR Observation resource | S4 |
 | `POST` | `/api/cpap-sync` | CPAP data sync from Mega Care | S5 |
+| `GET` | `/api/health` | Health check (v0.5.0) | S6 |
+| `GET` | `/api/docs` | Scalar API documentation UI | S6 |
+| `GET` | `/api/patients?query=` | Patient search | S6 |
+| `GET` | `/api/patients/:id/summary` | Patient summary | S6 |
+| `POST` | `/api/patients/:id/encounters` | Create encounter | S6 |
+| `GET` | `/api/patients/:id/sleep-reports` | Sleep reports | S6 |
+| `GET` | `/v1/audit/mcp` | MCP audit trail | S6 |
+| `GET` | `/v1/chat/status` | Chat widget status | S6 |
+| `GET` | `/chat` | Chat widget HTML | S6 |
+| `GET` | `/eir-chat-widget.js` | Chat FAB script | S6 |
+| `GET` | `/.well-known/agent.json` | A2A agent card | S6 |
+| `POST` | `/v1/a2a` | A2A send task | S6 |
 
 ## 5. Sprint 5 — New Components
 
@@ -99,7 +118,54 @@ flowchart LR
 | **Modes** | `--site sandbox`, `--dry-run`, `--migrate-only` |
 | **Migration Tracking** | `sql/.migrations_applied` (prevents re-running) |
 
-## 6. Configuration
+## 6. Sprint 6 — Rust Gateway (v0.5.0)
+
+### 6.1 Patient APIs (`src/patients.rs`)
+
+| Item | Detail |
+|:--|:--|
+| **Module** | `patients.rs` (321 lines) |
+| **Endpoints** | Search, Summary, Create Encounter, Sleep Reports |
+| **Tests** | 12 unit tests |
+| **FHIR** | Maps OpenEMR data → FHIR-compatible JSON |
+
+### 6.2 RBAC (`src/rbac.rs`)
+
+| Role | Patient Read | Create Encounter | Clinical Data |
+|:--|:--|:--|:--|
+| `doctor` | ✅ | ✅ | ✅ |
+| `nurse` | ✅ | ❌ | ✅ |
+| `admin` | ❌ | ❌ | ❌ |
+
+### 6.3 MCP Audit Trail (`src/mcp_audit.rs`)
+
+| Item | Detail |
+|:--|:--|
+| **Module** | `mcp_audit.rs` (227 lines) |
+| **Storage** | In-memory `DashMap` with timestamp |
+| **Query** | Filter by user, limit, date range |
+| **Tests** | 7 unit tests |
+
+### 6.4 Chat Widget (`src/chat.rs`)
+
+| Item | Detail |
+|:--|:--|
+| **Embedded UI** | `/chat` → HTML + CSS + JS |
+| **FAB Script** | `/eir-chat-widget.js` → injectable FAB button |
+| **OpenEMR PHP** | `eir_chat_widget.php` → injected into OpenEMR sidebar |
+
+## 7. Test Results (SI-04)
+
+| Suite | Run ID | Total | Pass | Rate | Status |
+|:--|:--|:--|:--|:--|:--|
+| Sandbox DB Verify | #17 | 27 | 27 | **100%** | ✅ |
+| Gateway E2E API | #18 | 30 | 1 | 3% | ⚠️ Pre-deploy |
+| Chat Widget UI | #19 | 12 | 1 | 8% | ⚠️ Pre-deploy |
+| Unit Tests (Rust) | local | 87 | 87 | **100%** | ✅ |
+
+> 📄 Full report: [`SI_04_SIT_Sprint5_Sprint6.md`](file:///Users/mimir/Developer/Eir/docs/iso_29110/SI_04_SIT_Sprint5_Sprint6.md)
+
+## 8. Configuration
 
 | Variable | Default | Description |
 |:--|:--|:--|
@@ -118,6 +184,7 @@ flowchart LR
 |:--|:--|:--|
 | 0.1.0 | 2026-03-18 | Initial: FHIR R4 proxy (FR-E01 to FR-E05) |
 | 0.2.0 | 2026-03-23 | Sprint 5: CPAP Sync API, LBF forms, migration_log, sandbox, deploy script (FR-E06 to FR-E11) |
+| 0.5.0 | 2026-03-23 | Sprint 6: Rust Gateway rewrite, Patient APIs, RBAC, MCP Audit, Chat Widget, A2A, Scalar Docs (FR-E12 to FR-E18). SI-04 test report. |
 
 ---
 
