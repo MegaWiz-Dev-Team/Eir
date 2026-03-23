@@ -244,47 +244,66 @@ Sprint 5 ของ Eir: PDPA Consent Remediation + Data Migration Readiness
 
 ---
 
-## Sprint 6: MCP Server + Embedded Chat UI
+## Sprint 6: Hermóðr MCP Integration + Eir REST Endpoints
 **Status:** 🏃 In Progress | **Period:** 2026-03-23 → TBD | **Tests:** TBD
 
+### Architecture Note
+> ⚠️ Sprint 6 เดิมวางงาน MCP Server ฝั่ง PHP (`McpServerController.php`) แต่ได้แก้ไขให้ตรงกับ
+> Architecture ที่ออกแบบไว้ — MCP จัดการโดย **Hermóðr** (Rust MCP Sidecar, standalone repo)
+> ไม่ใช่ PHP endpoint ใน OpenEMR
+>
+> Chat Widget UI สร้างเสร็จแล้วใน **Sprint 4** (`chat.rs`, `chat.html`, `chat-widget.js`)
+> — ไม่ต้องทำซ้ำ
+
 ### Tasks
-- [x] สร้าง MCP Server สำหรับ FHIR tools (`McpServerController.php`)
-- [x] สร้าง MCP Tool: `search_patients` — ค้นหาคนไข้ผ่าน FHIR
-- [x] สร้าง MCP Tool: `get_patient_summary` — ดึงสรุปข้อมูลคนไข้
-- [x] สร้าง MCP Tool: `create_encounter` — สร้าง Encounter ใหม่
-- [x] สร้าง MCP Tool: `get_sleep_reports` — ดึง Sleep Report data (จาก LBF)
-- [x] สร้าง Embedded Chat Widget UI (HTML + JS) — done prior
-- [ ] เชื่อม Chat Widget → Bifrost → MCP Server → Eir FHIR API
+**✅ Done (Architecture Correction):**
+- [x] สร้าง MCP Tools ใน Hermóðr: `search_patients`, `get_patient_summary`, `create_encounter`, `get_sleep_reports` (6 tools total)
+- [x] ลบ PHP MCP endpoint ที่สร้างผิดที่ (`McpServerController.php` + route)
+- [x] อัปเดต Bifrost config → ชี้ไป Hermóðr (:8091/rpc)
+- [x] แยก Hermóðr ออกเป็น standalone repo (MegaWiz-Dev-Team/Hermodr)
+- [x] อัปเดต docker-compose → `hermodr-yggdrasil` + `hermodr-eir`
+- [x] อัปเดต Asgard docs ทั้ง 8 ไฟล์ → reference Hermóðr
+
+**✅ Done (prior Sprint 4 — ไม่ต้องทำซ้ำ):**
+- [x] สร้าง Embedded Chat Widget UI (HTML + JS) — `gateway/static/chat.html` (686 lines)
+- [x] สร้าง Chat FAB inject script — `gateway/static/chat-widget.js` (180 lines)
+- [x] สร้าง Chat module — `gateway/src/chat.rs` (routes: `/chat`, `/v1/chat`, `/v1/chat/status`)
+- [x] Widget inject เข้า OpenEMR pages ผ่าน `proxy.rs`
+
+**📋 Remaining:**
+- [ ] สร้าง Eir Gateway REST endpoints ที่ Hermóðr tools ต้องการ:
+  - `GET /api/patients?query=` → search_patients
+  - `GET /api/patients/{id}/summary` → get_patient_summary
+  - `POST /api/patients/{id}/encounters` → create_encounter
+  - `GET /api/patients/{id}/sleep-reports` → get_sleep_reports
+- [ ] เชื่อม Chat Widget → Bifrost → Hermóðr → Eir Gateway REST
 - [ ] สร้าง RBAC สำหรับ Chat (หมอ vs พยาบาล vs Admin)
 - [ ] อัปเดต OpenAPI spec
-- [x] เขียน Integration Test (`tests/test_mcp_integration.py`)
 - [ ] Version bump → 0.5.0
 
 ### Prompt
 ```
-Sprint 6 ของ Eir: MCP Server (FHIR Tools) + Embedded Chat UI
+Sprint 6 ของ Eir: Hermóðr MCP Integration + REST Endpoints
 
 สถานะปัจจุบัน:
 - Eir Gateway v0.4.0 มี FHIR proxy, Auth (JWKS), A2A protocol, Agent Tools
 - Sprint 5 เสร็จ: มี LBF Forms (CPAP, Sleep Report), Consent Gate, Sandbox
+- Chat Widget UI เสร็จแล้วจาก Sprint 4 (chat.html + chat-widget.js + chat.rs)
+- MCP ย้ายไปใช้ Hermóðr (Rust MCP Sidecar) — แยก repo แล้ว
 - Data Migration จาก Mega Care กำลังดำเนินการ (Dual-Write)
 
 สิ่งที่ต้องทำ:
 
-1. MCP Server (src/mcp.rs):
-   - Implement MCP protocol (Model Context Protocol) ตามมาตรฐาน
-   - ให้ Eir เป็น MCP Server ที่ Asgard/Bifrost เรียกใช้ tools ได้
-   - Tools:
-     a. search_patients(query: str) → FHIR Patient search results
-     b. get_patient_summary(patient_id: str) → สรุปข้อมูลคนไข้ (demographics + CPAP + sleep data)
-     c. create_encounter(patient_id: str, type: str) → สร้าง Encounter ใหม่
-     d. get_sleep_reports(patient_id: str, days: int) → ดึง Sleep Report data จาก LBF form
+1. Eir Gateway REST Endpoints (gateway/src/patients.rs):
+   - สร้าง endpoints ที่ Hermóðr sidecar เรียก:
+     a. GET /api/patients?query= → proxy ไป FHIR Patient search
+     b. GET /api/patients/{id}/summary → aggregate demographics + CPAP + sleep data
+     c. POST /api/patients/{id}/encounters → proxy ไป FHIR Encounter create
+     d. GET /api/patients/{id}/sleep-reports?days= → query LBF Sleep_Report_Data
 
-2. Embedded Chat Widget:
-   - สร้าง HTML + JS chat widget inject เข้าหน้า OpenEMR
-   - Chat → Bifrost Agent → MCP Tools → Eir FHIR API
-   - UI: ปุ่มลอย มุมล่างขวา, expand เป็น chat window
-   - เพียงแค่ถาม "สรุปข้อมูลคนไข้ SANDBOX-PT-001" ได้
+2. เชื่อม Chat Widget → Bifrost → Hermóðr → Eir Gateway:
+   - Chat widget (done) → POST /v1/chat → Bifrost → hermodr-eir:8091/rpc → Eir Gateway REST
+   - ทดสอบ: พิมพ์ "สรุปข้อมูลคนไข้ SANDBOX-PT-001" ได้ผลลัพธ์จริง
 
 3. RBAC สำหรับ Chat:
    - หมอ: เข้าถึงทุก tool
@@ -294,9 +313,10 @@ Sprint 6 ของ Eir: MCP Server (FHIR Tools) + Embedded Chat UI
 4. Audit Trail: ทุก MCP call → log ไว้ใน audit table
 
 Version bump → 0.5.0
-เขียน Unit Tests + Integration Tests ครบทุก tool
+เขียน Unit Tests + Integration Tests ครบทุก endpoint
 ```
 
 ---
 
-*บันทึกโดย: AI Assistant | อัปเดตล่าสุด: 2026-03-22*
+*บันทึกโดย: AI Assistant | อัปเดตล่าสุด: 2026-03-23*
+
