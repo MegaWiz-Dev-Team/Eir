@@ -181,11 +181,10 @@ Version bump → 0.4.0
 - [x] รัน Tests: 40/40 passed (100%) — Forseti run_id=30
 - [x] อัพเดต ISO Docs: `SI_01_Implementation_Report.md` v0.2.0
 
-**Remaining (Manual/Ops — ไม่ต้อง code):**
-- [ ] Deploy Consent Gate ขึ้น Production (GCP: `mega-care`)
-- [ ] รัน `set_pending_consent.py` กับ Firestore production
-- [ ] ส่ง Consent Request Batch 1 (Line OA)
-- [ ] Monitor Cloud Logging
+**Remaining (Eir Sandbox Only):**
+- [ ] รัน SQL migrations บน Eir sandbox (`sql/migrations/*.sql`)
+- [ ] ทดสอบ `POST /cpap-sync` API บน sandbox
+- [ ] Verify LBF forms แสดงผลถูกต้องใน OpenEMR sandbox UI
 
 ### Environment
 | สภาพแวดล้อม | Mega Care (GCP) | Eir Site | Firestore |
