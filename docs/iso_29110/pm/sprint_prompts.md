@@ -245,19 +245,19 @@ Sprint 5 ของ Eir: PDPA Consent Remediation + Data Migration Readiness
 ---
 
 ## Sprint 6: MCP Server + Embedded Chat UI
-**Status:** 📋 Planned | **Period:** TBD | **Tests:** TBD
+**Status:** 🏃 In Progress | **Period:** 2026-03-23 → TBD | **Tests:** TBD
 
 ### Tasks
-- [ ] สร้าง MCP Server สำหรับ FHIR tools (expose Patient, Encounter, MedicationRequest)
-- [ ] สร้าง MCP Tool: `search_patients` — ค้นหาคนไข้ผ่าน FHIR
-- [ ] สร้าง MCP Tool: `get_patient_summary` — ดึงสรุปข้อมูลคนไข้
-- [ ] สร้าง MCP Tool: `create_encounter` — สร้าง Encounter ใหม่
-- [ ] สร้าง MCP Tool: `get_sleep_reports` — ดึง Sleep Report data (จาก LBF)
-- [ ] สร้าง Embedded Chat Widget UI (HTML + JS)
+- [x] สร้าง MCP Server สำหรับ FHIR tools (`McpServerController.php`)
+- [x] สร้าง MCP Tool: `search_patients` — ค้นหาคนไข้ผ่าน FHIR
+- [x] สร้าง MCP Tool: `get_patient_summary` — ดึงสรุปข้อมูลคนไข้
+- [x] สร้าง MCP Tool: `create_encounter` — สร้าง Encounter ใหม่
+- [x] สร้าง MCP Tool: `get_sleep_reports` — ดึง Sleep Report data (จาก LBF)
+- [x] สร้าง Embedded Chat Widget UI (HTML + JS) — done prior
 - [ ] เชื่อม Chat Widget → Bifrost → MCP Server → Eir FHIR API
 - [ ] สร้าง RBAC สำหรับ Chat (หมอ vs พยาบาล vs Admin)
 - [ ] อัปเดต OpenAPI spec
-- [ ] เขียน Unit Tests + Integration Tests
+- [x] เขียน Integration Test (`tests/test_mcp_integration.py`)
 - [ ] Version bump → 0.5.0
 
 ### Prompt
