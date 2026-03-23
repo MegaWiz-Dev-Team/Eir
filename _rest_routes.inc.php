@@ -41,16 +41,3 @@ RestConfig::$ROUTE_MAP["POST /api/cpap-sync"] = function () {
     $controller = new \OpenEMR\RestControllers\CpapSyncRestController();
     return $controller->sync($data);
 };
-
-// MCP Server — JSON-RPC endpoint for Bifrost AI agent
-RestConfig::$ROUTE_MAP["POST /api/mcp"] = function () {
-    $data = json_decode(file_get_contents("php://input"), true) ?? [];
-    $controller = new \OpenEMR\RestControllers\McpServerController();
-    $response = $controller->handleRequest($data);
-    if ($response === null) {
-        // Notification — no response
-        http_response_code(204);
-        return null;
-    }
-    return $response;
-};
