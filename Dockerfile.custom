@@ -1,0 +1,6 @@
+FROM openemr/openemr:7.0.2
+
+COPY src/RestControllers/Authorization/SkipAuthorizationStrategy.php /var/www/localhost/htdocs/openemr/src/RestControllers/Authorization/SkipAuthorizationStrategy.php
+
+# Permanently bypass mkdir check in globals.php which fails under K3s PVCs despite correct permissions
+RUN sed -i 's/if (!mkdir($concurrentDirectory/if (false \&\& !mkdir($concurrentDirectory/g' /var/www/localhost/htdocs/openemr/interface/globals.php

@@ -31,6 +31,7 @@ mod health;
 mod jwks;
 mod knowledge;
 mod mcp_audit;
+mod oauth;
 mod openapi;
 mod patients;
 mod proxy;
@@ -81,6 +82,13 @@ async fn main() {
 
     let shared_config = Arc::new(config.clone());
 
+    // OAuth2 token service for upstream OpenEMR API calls
+    let token_service = oauth::OAuthConfig::from_env().map(|c| {
+        let ts = Arc::new(oauth::TokenService::new(c));
+        tracing::info!("OAuth2 token service configured for OpenEMR");
+        ts
+    });
+
     // Sprint 2 state: cache + rate limiter
     let response_cache = Arc::new(ResponseCache::new(config.cache_ttl_secs));
     let rate_limiter = Arc::new(RateLimiterState::new(config.rate_limit_rps));
@@ -117,7 +125,10 @@ async fn main() {
         // Sprint 4: Chat interface
         .merge(chat::router())
         // Sprint 6: Hermóðr patient endpoints
-        .merge(patients::router())
+        .merge(patients::router(patients::PatientState {
+            config: shared_config.clone(),
+            token_service: token_service.clone(),
+        }))
         // Sprint 6: MCP audit query endpoint
         .merge(mcp_audit::router().with_state(audit_store.clone()))
         // Proxy all other routes to OpenEMR

@@ -117,7 +117,7 @@ async fn chat_proxy(
     let agent_id = payload.agent.as_deref().unwrap_or("default");
 
     let bifrost_url = format!(
-        "{}/agents/{}/stream",
+        "{}/v1/agents/{}/stream",
         config.bifrost_url, agent_id
     );
 

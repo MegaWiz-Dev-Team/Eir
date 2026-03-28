@@ -34,7 +34,10 @@ async fn proxy_handler(
     let upstream_url = format!("{}{}{}", config.openemr_url, path, query);
 
     // Build upstream request
-    let client = reqwest::Client::new();
+    let client = reqwest::Client::builder()
+        .danger_accept_invalid_certs(true)
+        .build()
+        .unwrap_or_else(|_| reqwest::Client::new());
     let method = request.method().clone();
 
     let mut builder = client.request(

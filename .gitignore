@@ -41,3 +41,6 @@ sites/*/sqlconf.php
 sites/default/documents/
 sites/default/images/login_logo.gif
 sites/default/images/logo_*.png
+
+# custom mock/demo data
+default/

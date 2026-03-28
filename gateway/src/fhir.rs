@@ -44,7 +44,10 @@ async fn fhir_proxy_handler(
         "FHIR R4 proxy request"
     );
 
-    let client = reqwest::Client::new();
+    let client = reqwest::Client::builder()
+        .danger_accept_invalid_certs(true)
+        .build()
+        .unwrap_or_else(|_| reqwest::Client::new());
     let method = request.method().clone();
 
     let mut builder = client.request(

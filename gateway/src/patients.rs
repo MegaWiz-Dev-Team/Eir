@@ -18,14 +18,23 @@ use serde_json::{json, Value};
 use std::sync::Arc;
 
 use crate::config::Config;
+use crate::oauth::TokenService;
+
+/// Shared state for patient handlers.
+#[derive(Clone)]
+pub struct PatientState {
+    pub config: Arc<Config>,
+    pub token_service: Option<Arc<TokenService>>,
+}
 
 /// Build the patients router.
-pub fn router() -> Router<Arc<Config>> {
+pub fn router(state: PatientState) -> Router<Arc<Config>> {
     Router::new()
         .route("/api/patients", get(search_patients))
         .route("/api/patients/{id}/summary", get(get_patient_summary))
         .route("/api/patients/{id}/encounters", post(create_encounter))
         .route("/api/patients/{id}/sleep-reports", get(get_sleep_reports))
+        .with_state(state)
 }
 
 // ─── DTOs ────────────────────────────────────────────────────────────────
@@ -76,7 +85,8 @@ pub struct ApiResponse {
 ///
 /// Proxies to FHIR Patient search with intelligent query parameter mapping.
 async fn search_patients(
-    State(config): State<Arc<Config>>,
+    State(state): State<PatientState>,
+    headers: axum::http::HeaderMap,
     Query(params): Query<PatientSearchQuery>,
 ) -> Result<Json<ApiResponse>, (StatusCode, Json<Value>)> {
     let query = params.query.unwrap_or_default();
@@ -86,7 +96,7 @@ async fn search_patients(
 
     let upstream_url = format!(
         "{}/apis/default/fhir/Patient?{}",
-        config.openemr_url, fhir_params
+        state.config.openemr_url, fhir_params
     );
 
     tracing::info!(
@@ -95,12 +105,15 @@ async fn search_patients(
         "Hermóðr search_patients"
     );
 
-    let client = reqwest::Client::new();
+    let auth = resolve_auth(&headers, &state.token_service).await;
+
+    let client = build_client();
     let response = client
         .get(&upstream_url)
         .header("Accept", "application/fhir+json")
         .header("X-Gateway", "eir-gateway")
         .header("X-MCP-Tool", "search_patients")
+        .header("Authorization", &auth)
         .send()
         .await
         .map_err(|e| {
@@ -136,36 +149,38 @@ async fn search_patients(
 /// Fetches Patient resource, CPAP_Prescription LBF, and Sleep_Report_Data LBF
 /// then merges into a single summary response.
 async fn get_patient_summary(
-    State(config): State<Arc<Config>>,
+    State(state): State<PatientState>,
+    headers: axum::http::HeaderMap,
     Path(patient_id): Path<String>,
 ) -> Result<Json<PatientSummaryResponse>, (StatusCode, Json<Value>)> {
-    let client = reqwest::Client::new();
+    let client = build_client();
 
     tracing::info!(
         patient_id = %patient_id,
         "Hermóðr get_patient_summary"
     );
 
+    let auth = resolve_auth(&headers, &state.token_service).await;
     // 1. Fetch Patient demographics from FHIR
     let patient_url = format!(
         "{}/apis/default/fhir/Patient/{}",
-        config.openemr_url, patient_id
+        state.config.openemr_url, patient_id
     );
-    let patient_data = fetch_json(&client, &patient_url).await;
+    let patient_data = fetch_json(&client, &patient_url, &auth).await;
 
     // 2. Fetch CPAP Prescription (LBF form via OpenEMR API)
     let cpap_url = format!(
         "{}/apis/default/api/patient/{}/medical_problem?type=CPAP_Prescription",
-        config.openemr_url, patient_id
+        state.config.openemr_url, patient_id
     );
-    let cpap_data = fetch_json(&client, &cpap_url).await;
+    let cpap_data = fetch_json(&client, &cpap_url, &auth).await;
 
     // 3. Fetch latest Sleep Report data (LBF form via OpenEMR API)
     let sleep_url = format!(
         "{}/apis/default/api/patient/{}/medical_problem?type=Sleep_Report_Data&_count=7",
-        config.openemr_url, patient_id
+        state.config.openemr_url, patient_id
     );
-    let sleep_data = fetch_json(&client, &sleep_url).await;
+    let sleep_data = fetch_json(&client, &sleep_url, &auth).await;
 
     Ok(Json(PatientSummaryResponse {
         status: "success".into(),
@@ -184,7 +199,8 @@ async fn get_patient_summary(
 ///
 /// Proxies to FHIR Encounter create with proper patient reference.
 async fn create_encounter(
-    State(config): State<Arc<Config>>,
+    State(state): State<PatientState>,
+    headers: axum::http::HeaderMap,
     Path(patient_id): Path<String>,
     Json(payload): Json<CreateEncounterRequest>,
 ) -> Result<Json<ApiResponse>, (StatusCode, Json<Value>)> {
@@ -220,16 +236,19 @@ async fn create_encounter(
 
     let upstream_url = format!(
         "{}/apis/default/fhir/Encounter",
-        config.openemr_url
+        state.config.openemr_url
     );
 
-    let client = reqwest::Client::new();
+    let auth = resolve_auth(&headers, &state.token_service).await;
+
+    let client = build_client();
     let response = client
         .post(&upstream_url)
         .header("Content-Type", "application/fhir+json")
         .header("Accept", "application/fhir+json")
         .header("X-Gateway", "eir-gateway")
         .header("X-MCP-Tool", "create_encounter")
+        .header("Authorization", &auth)
         .json(&encounter)
         .send()
         .await
@@ -266,7 +285,8 @@ async fn create_encounter(
 ///
 /// Fetches Sleep_Report_Data LBF entries for the specified patient and time range.
 async fn get_sleep_reports(
-    State(config): State<Arc<Config>>,
+    State(state): State<PatientState>,
+    headers: axum::http::HeaderMap,
     Path(patient_id): Path<String>,
     Query(params): Query<SleepReportQuery>,
 ) -> Result<Json<ApiResponse>, (StatusCode, Json<Value>)> {
@@ -285,15 +305,18 @@ async fn get_sleep_reports(
     // Query Sleep_Report_Data LBF via OpenEMR custom API
     let upstream_url = format!(
         "{}/apis/default/api/patient/{}/medical_problem?type=Sleep_Report_Data&date_from={}",
-        config.openemr_url, patient_id, since_str
+        state.config.openemr_url, patient_id, since_str
     );
 
-    let client = reqwest::Client::new();
+    let auth = resolve_auth(&headers, &state.token_service).await;
+
+    let client = build_client();
     let response = client
         .get(&upstream_url)
         .header("Accept", "application/json")
         .header("X-Gateway", "eir-gateway")
         .header("X-MCP-Tool", "get_sleep_reports")
+        .header("Authorization", &auth)
         .send()
         .await
         .map_err(|e| {
@@ -328,12 +351,46 @@ async fn get_sleep_reports(
 
 // ─── Helpers ─────────────────────────────────────────────────────────────
 
+/// Resolve the Authorization header: use caller-provided or auto-acquire from TokenService.
+async fn resolve_auth(
+    headers: &axum::http::HeaderMap,
+    token_service: &Option<Arc<TokenService>>,
+) -> String {
+    // If caller already provides a valid-looking Authorization header, use it
+    if let Some(auth) = headers.get("authorization").and_then(|v| v.to_str().ok()) {
+        if auth.starts_with("Bearer ") && auth.len() > 10 {
+            return auth.to_string();
+        }
+    }
+
+    // Auto-acquire from TokenService
+    if let Some(ref ts) = token_service {
+        match ts.get_token().await {
+            Ok(token) => return format!("Bearer {}", token),
+            Err(e) => {
+                tracing::error!(error = %e, "Failed to auto-acquire OAuth2 token");
+            }
+        }
+    }
+
+    String::new()
+}
+
+/// Build an HTTP client that accepts self-signed certs (internal K8s).
+fn build_client() -> reqwest::Client {
+    reqwest::Client::builder()
+        .danger_accept_invalid_certs(true)
+        .build()
+        .unwrap_or_else(|_| reqwest::Client::new())
+}
+
 /// Fetch JSON from an upstream URL, returning a Value. Errors become null.
-async fn fetch_json(client: &reqwest::Client, url: &str) -> Value {
+async fn fetch_json(client: &reqwest::Client, url: &str, auth: &str) -> Value {
     match client
         .get(url)
         .header("Accept", "application/json")
         .header("X-Gateway", "eir-gateway")
+        .header("Authorization", auth)
         .send()
         .await
     {
@@ -404,7 +461,11 @@ mod tests {
     #[test]
     fn test_patients_router_creation() {
         let config = Arc::new(Config::from_env());
-        let _app: axum::Router = router().with_state(config);
+        let state = PatientState {
+            config: config.clone(),
+            token_service: None,
+        };
+        let _app: axum::Router = router(state).with_state(config);
     }
 
     #[test]

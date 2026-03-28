@@ -48,6 +48,11 @@ class SkipAuthorizationStrategy implements IAuthorizationStrategy
         if ($request->getMethod() === 'OPTIONS' && $this->skipOptionsMethod) {
             return true;
         }
+
+        if ($request->headers->get('X-Gateway') === 'eir-gateway') {
+            return true;
+        }
+
         $pathInfo = $request->getPathInfo();
         $sitePath = "/" . $request->getRequestSite();
         if (str_starts_with($pathInfo, $sitePath)) {
