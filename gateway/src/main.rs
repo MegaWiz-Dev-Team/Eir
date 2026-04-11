@@ -38,6 +38,7 @@ mod proxy;
 mod rate_limit;
 mod rbac;
 mod transform;
+mod webhook;
 
 use axum::middleware;
 use std::sync::Arc;
@@ -100,6 +101,9 @@ async fn main() {
     // Sprint 6 state: MCP audit store
     let audit_store = Arc::new(AuditStore::new());
 
+    // Sprint 1 state: Webhook store
+    let webhook_store = Arc::new(webhook::WebhookStore::new());
+
     // CORS layer
     let cors = CorsLayer::new()
         .allow_origin(Any)
@@ -131,6 +135,8 @@ async fn main() {
         }))
         // Sprint 6: MCP audit query endpoint
         .merge(mcp_audit::router().with_state(audit_store.clone()))
+        // Sprint 1: Webhook Context Router
+        .merge(webhook::router().with_state(webhook_store))
         // Proxy all other routes to OpenEMR
         .merge(proxy::router())
         // Cache layer

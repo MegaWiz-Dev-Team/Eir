@@ -46,10 +46,10 @@
             width: 56px;
             height: 56px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #22c55e, #16a34a);
+            background: linear-gradient(135deg, #38a183, #298269); /* Mega Care Mint */
             border: none;
             cursor: pointer;
-            box-shadow: 0 4px 20px rgba(34, 197, 94, 0.4);
+            box-shadow: 0 4px 20px rgba(41, 130, 105, 0.4);
             z-index: 99999;
             display: flex;
             align-items: center;
@@ -60,7 +60,7 @@
         }
         #eir-chat-fab:hover {
             transform: scale(1.1);
-            box-shadow: 0 6px 30px rgba(34, 197, 94, 0.6);
+            box-shadow: 0 6px 32px rgba(41, 130, 105, 0.6);
         }
         #eir-chat-fab.open {
             animation: none;
@@ -68,8 +68,8 @@
             box-shadow: 0 4px 20px rgba(107, 114, 128, 0.4);
         }
         @keyframes eir-pulse {
-            0%, 100% { box-shadow: 0 4px 20px rgba(34, 197, 94, 0.4); }
-            50% { box-shadow: 0 4px 30px rgba(34, 197, 94, 0.7); }
+            0%, 100% { box-shadow: 0 4px 20px rgba(41, 130, 105, 0.4); }
+            50% { box-shadow: 0 4px 30px rgba(41, 130, 105, 0.7); }
         }
 
         #eir-chat-panel {
@@ -81,8 +81,8 @@
             border-radius: 16px;
             overflow: hidden;
             z-index: 99998;
-            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(88, 166, 255, 0.2);
+            box-shadow: 0 12px 48px rgba(41, 130, 105, 0.15); /* Soft Mint Shadow */
+            border: 1px solid rgba(41, 130, 105, 0.3); /* Mint border */
             display: none;
             opacity: 0;
             transform: translateY(16px) scale(0.95);

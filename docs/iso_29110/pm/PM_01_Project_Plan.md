@@ -90,7 +90,7 @@ src/
 | **S3** | 2 wk | Bifrost Agent Tools, Mimir Sync, A2A Protocol | 47 | ✅ Done (2026-03-12) |
 | **S4** | 2 wk | Yggdrasil JWKS Auth (RS256) | 57 | ✅ Done (2026-03-15) |
 | **S5** | 4 days | 🔴 PDPA Consent Gate, e-Consent, Migration Prep | — | 🏃 In Progress (2026-03-22) |
-| **S6** | 2 wk | MCP Server (FHIR tools), Embedded Chat UI | — | 📋 Planned |
+| **S6** | 2 wk | MCP Server (FHIR tools), Embedded Chat UI | — | ✅ Done (2026-04-10) |
 
 ---
 

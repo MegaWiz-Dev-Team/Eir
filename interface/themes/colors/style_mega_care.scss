@@ -1,0 +1,21 @@
+$colorname: "Mega Care Mint";
+
+$darkest: #0e2722;
+$darker: #1a453a;
+$dark: #236855;
+$mid: #38a183;
+$midpale: #5cbda0;
+$pale: #91d7c0;
+$midpalepale: #bfeadb;
+$palepale: #e0f6eb;
+$palepurple: #f2fcf8;
+$paler: #fcfdfe;
+$midnightblue: #0e2722;
+$white: #ffffff;
+
+@import "utilities/default_variables";
+// Import Bootstrap 4 SCSS Files before doing anything
+// This gets replaced in gulp now -- do not touch
+// bs4import
+
+@import "../color_base";
