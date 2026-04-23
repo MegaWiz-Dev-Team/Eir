@@ -1,6 +1,6 @@
 {
   "name": "openemr-interface",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "UI toolkit, theme and component library for OpenEMR",
   "main": "index.js",
   "scripts": {
