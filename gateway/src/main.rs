@@ -104,6 +104,7 @@ async fn main() {
     // Sprint 1 state: Webhook store
     let webhook_store = Arc::new(webhook::WebhookStore::new());
 
+
     // CORS layer
     let cors = CorsLayer::new()
         .allow_origin(Any)
