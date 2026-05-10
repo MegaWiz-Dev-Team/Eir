@@ -1,7 +1,9 @@
-# 🌿 Eir — Build & Push eir-gateway image to ghcr.io
-# Polyrepo CI pattern. Eir is OpenEMR fork; this workflow only builds
-# the Rust gateway (Dockerfile.gateway). Main OpenEMR PHP image is
-# built+published by upstream OpenEMR project, not here.
+# 🌿 Eir — Build & Push Asgard images to ghcr.io
+# Polyrepo CI pattern. Eir is OpenEMR fork; this workflow builds the
+# Asgard-specific images:
+#   - eir-gateway   (Dockerfile.gateway)  — Rust auth/FHIR gateway
+#   - asgard-eir    (Dockerfile.custom)   — OpenEMR with Asgard customizations
+# Upstream OpenEMR PHP image is built+published by upstream, not here.
 
 name: Build
 
@@ -10,17 +12,26 @@ on:
     branches: [main]
     paths:
       - 'gateway/**'
+      - 'src/RestControllers/**'
       - 'Dockerfile.gateway'
+      - 'Dockerfile.custom'
       - '.github/workflows/build.yml'
   workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE: eir-gateway
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: eir-gateway
+            dockerfile: ./Dockerfile.gateway
+          - image: asgard-eir
+            dockerfile: ./Dockerfile.custom
     permissions:
       contents: read
       packages: write
@@ -38,14 +49,14 @@ jobs:
       - uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./Dockerfile.gateway
+          file: ${{ matrix.dockerfile }}
           push: true
           platforms: linux/amd64,linux/arm64
           tags: |
-            ${{ env.REGISTRY }}/megawiz-dev-team/${{ env.IMAGE }}:${{ github.sha }}
-            ${{ env.REGISTRY }}/megawiz-dev-team/${{ env.IMAGE }}:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+            ${{ env.REGISTRY }}/megawiz-dev-team/${{ matrix.image }}:${{ github.sha }}
+            ${{ env.REGISTRY }}/megawiz-dev-team/${{ matrix.image }}:latest
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
 
   ci-success:
     needs: build
@@ -53,5 +64,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          if [ "${{ needs.build.result }}" != "success" ]; then echo "❌"; exit 1; fi
-          echo "✅"
+          if [ "${{ needs.build.result }}" != "success" ]; then echo "❌ build failed"; exit 1; fi
+          echo "✅ build passed"
