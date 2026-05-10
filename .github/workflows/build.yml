@@ -1,0 +1,57 @@
+# 🌿 Eir — Build & Push eir-gateway image to ghcr.io
+# Polyrepo CI pattern. Eir is OpenEMR fork; this workflow only builds
+# the Rust gateway (Dockerfile.gateway). Main OpenEMR PHP image is
+# built+published by upstream OpenEMR project, not here.
+
+name: Build
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'gateway/**'
+      - 'Dockerfile.gateway'
+      - '.github/workflows/build.yml'
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE: eir-gateway
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile.gateway
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            ${{ env.REGISTRY }}/megawiz-dev-team/${{ env.IMAGE }}:${{ github.sha }}
+            ${{ env.REGISTRY }}/megawiz-dev-team/${{ env.IMAGE }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  ci-success:
+    needs: build
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          if [ "${{ needs.build.result }}" != "success" ]; then echo "❌"; exit 1; fi
+          echo "✅"
