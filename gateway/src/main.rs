@@ -26,6 +26,8 @@ mod auth;
 mod cache;
 mod chat;
 mod config;
+mod documents;
+mod extraction;
 mod fhir;
 mod health;
 mod jwks;
@@ -129,6 +131,10 @@ async fn main() {
         .merge(a2a::router().with_state(a2a_task_store.clone()))
         // Sprint 4: Chat interface
         .merge(chat::router())
+        // Document upload and management
+        .merge(documents::router())
+        // Medical history extraction
+        .merge(extraction::router())
         // Sprint 6: Hermóðr patient endpoints
         .merge(patients::router(patients::PatientState {
             config: shared_config.clone(),

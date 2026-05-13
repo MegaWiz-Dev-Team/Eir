@@ -37,6 +37,8 @@ pub struct ChatRequest {
     pub agent: Option<String>,
     /// Optional session/conversation ID for context
     pub session_id: Option<String>,
+    /// Optional patient ID for scoped conversation
+    pub patient_id: Option<String>,
 }
 
 #[derive(Debug, Serialize)]
@@ -106,33 +108,33 @@ async fn chat_status(
     })
 }
 
-/// POST /v1/chat — Proxy user message to Bifrost agent streaming endpoint.
+/// POST /v1/chat — Proxy user message to Bifrost agent run endpoint.
 ///
-/// Forwards the message to Bifrost's `/agents/{agent_id}/stream` endpoint
-/// and streams the SSE response back to the client.
+/// Calls Bifrost `POST /v1/agents/{agent_id}/run` with header `X-Tenant-Id`
+/// and JSON body `{query, session_id}`, then maps the `SwarmResponse`
+/// (`final_answer`, `trace_id`, `steps`, `reasoning`) into a flat reply
+/// the chat-widget understands (`response` + extras).
 async fn chat_proxy(
     State(config): State<Arc<Config>>,
     Json(payload): Json<ChatRequest>,
 ) -> Response {
-    let agent_id = payload.agent.as_deref().unwrap_or("default");
+    let default_agent = std::env::var("DEFAULT_AGENT_ID").unwrap_or_else(|_| "28".to_string());
+    let agent_id = payload.agent.as_deref().unwrap_or(&default_agent);
 
-    let bifrost_url = format!(
-        "{}/v1/agents/{}/stream",
-        config.bifrost_url, agent_id
-    );
+    let bifrost_url = format!("{}/v1/agents/{}/run", config.bifrost_url, agent_id);
 
     tracing::info!(
         bifrost_url = %bifrost_url,
         message = %payload.message,
         agent = %agent_id,
+        tenant = %config.tenant_id,
         "Chat proxy → Bifrost"
     );
 
-    // Build Bifrost request
     let body = json!({
-        "message": payload.message,
+        "query": payload.message,
         "session_id": payload.session_id,
-        "stream": true,
+        "patient_id": payload.patient_id,
     });
 
     let client = reqwest::Client::builder()
@@ -143,7 +145,7 @@ async fn chat_proxy(
     let response = match client
         .post(&bifrost_url)
         .header("Content-Type", "application/json")
-        .header("Accept", "text/event-stream")
+        .header("X-Tenant-Id", &config.tenant_id)
         .header("X-Gateway", "eir-gateway")
         .json(&body)
         .send()
@@ -156,7 +158,7 @@ async fn chat_proxy(
                 StatusCode::BAD_GATEWAY,
                 Json(json!({
                     "error": format!("Cannot reach Bifrost at {}: {}", config.bifrost_url, e),
-                    "hint": "Ensure Bifrost is running: docker compose up -d bifrost"
+                    "hint": "Ensure Bifrost is running and BIFROST_URL is set."
                 })),
             )
                 .into_response();
@@ -164,33 +166,32 @@ async fn chat_proxy(
     };
 
     let status = response.status();
-
-    // If Bifrost returns SSE, stream it through
-    if response
-        .headers()
-        .get(header::CONTENT_TYPE)
-        .and_then(|v| v.to_str().ok())
-        .map(|ct| ct.contains("text/event-stream"))
-        .unwrap_or(false)
-    {
-        let stream = response.bytes_stream();
-        return Response::builder()
-            .status(status.as_u16())
-            .header(header::CONTENT_TYPE, "text/event-stream")
-            .header(header::CACHE_CONTROL, "no-cache")
-            .header("X-Accel-Buffering", "no")
-            .body(Body::from_stream(stream))
-            .unwrap();
-    }
-
-    // Non-streaming response: forward JSON body
     let body_bytes = response.bytes().await.unwrap_or_default();
-    let json_body: Value =
-        serde_json::from_slice(&body_bytes).unwrap_or(json!({"raw": String::from_utf8_lossy(&body_bytes)}));
+    let json_body: Value = serde_json::from_slice(&body_bytes)
+        .unwrap_or(json!({"raw": String::from_utf8_lossy(&body_bytes)}));
+
+    // Map Bifrost SwarmResponse → chat-widget shape.
+    // Widget reads `data.response || data.result || data.message` (chat.html:665).
+    let final_answer = json_body
+        .get("final_answer")
+        .and_then(|v| v.as_str())
+        .map(str::to_string);
+
+    let widget_body = if let Some(ans) = final_answer {
+        json!({
+            "response": ans,
+            "trace_id": json_body.get("trace_id"),
+            "reasoning": json_body.get("reasoning"),
+            "steps": json_body.get("steps"),
+        })
+    } else {
+        // Bifrost returned an error or unexpected shape — pass through verbatim.
+        json_body
+    };
 
     (
         StatusCode::from_u16(status.as_u16()).unwrap_or(StatusCode::INTERNAL_SERVER_ERROR),
-        Json(json_body),
+        Json(widget_body),
     )
         .into_response()
 }

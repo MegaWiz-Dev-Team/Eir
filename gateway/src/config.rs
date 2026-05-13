@@ -27,6 +27,10 @@ pub struct Config {
     pub tenant_id: String,
     /// Bifrost agent runtime URL
     pub bifrost_url: String,
+    /// Syn OCR service URL
+    pub syn_url: String,
+    /// Mimir RAG service URL
+    pub mimir_url: String,
 }
 
 impl Config {
@@ -63,6 +67,10 @@ impl Config {
             tenant_id: env::var("TENANT_ID").unwrap_or_else(|_| "default".to_string()),
             bifrost_url: env::var("BIFROST_URL")
                 .unwrap_or_else(|_| "http://bifrost:8100".to_string()),
+            syn_url: env::var("SYN_URL")
+                .unwrap_or_else(|_| "http://syn-api.asgard.svc:8080".to_string()),
+            mimir_url: env::var("MIMIR_URL")
+                .unwrap_or_else(|_| "http://mimir.asgard.svc:3100".to_string()),
         }
     }
 }

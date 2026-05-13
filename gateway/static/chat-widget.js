@@ -36,6 +36,16 @@
     const CHAT_URL = GATEWAY + '/chat';
     const STATUS_URL = GATEWAY + '/v1/chat/status';
 
+    // Read patient_id from OpenEMR
+    function getOpenEMRPatientId() {
+      if (window.pid && String(window.pid) !== '0') return String(window.pid);
+      const p = new URLSearchParams(window.location.search).get('set_pid');
+      if (p && p !== '0') return p;
+      const el = document.querySelector('input[name="pid"]');
+      if (el?.value && el.value !== '0') return el.value;
+      return '';
+    }
+
     // ── Styles ──
     const style = document.createElement('style');
     style.textContent = `
@@ -151,7 +161,8 @@
         isOpen = !isOpen;
         if (isOpen) {
             if (!iframe.src || iframe.src === '' || iframe.src === window.location.href) {
-                iframe.src = CHAT_URL;
+                const pid = getOpenEMRPatientId();
+                iframe.src = CHAT_URL + (pid ? `?patient_id=${encodeURIComponent(pid)}` : '');
             }
             panel.classList.add('visible');
             fab.classList.add('open');
@@ -164,6 +175,16 @@
             fab.appendChild(badge);
         }
     });
+
+    // ── Watch for patient context changes ──
+    let lastPid = getOpenEMRPatientId();
+    setInterval(() => {
+      const currentPid = getOpenEMRPatientId();
+      if (currentPid !== lastPid) {
+        lastPid = currentPid;
+        iframe.contentWindow?.postMessage({ type: 'patient_context', patient_id: currentPid }, '*');
+      }
+    }, 2000);
 
     // ── Status Check ──
     async function checkBifrost() {
