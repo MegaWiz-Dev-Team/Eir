@@ -355,6 +355,6 @@ async fn create_fhir_document_reference(
 /// Router for document endpoints
 pub fn router() -> Router<Arc<Config>> {
     Router::new()
-        .route("/v1/patients/:patient_id/documents", post(upload_document))
-        .route("/v1/patients/:patient_id/documents", get(list_documents))
+        .route("/v1/patients/{patient_id}/documents", post(upload_document))
+        .route("/v1/patients/{patient_id}/documents", get(list_documents))
 }
