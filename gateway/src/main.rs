@@ -44,7 +44,7 @@ mod webhook;
 
 use axum::middleware;
 use std::sync::Arc;
-use tower_http::cors::{Any, CorsLayer};
+use tower_http::cors::{AllowOrigin, Any, CorsLayer};
 use tracing_subscriber::{fmt, EnvFilter};
 
 use crate::a2a::A2ATaskStore;
@@ -107,11 +107,26 @@ async fn main() {
     let webhook_store = Arc::new(webhook::WebhookStore::new());
 
 
-    // CORS layer
-    let cors = CorsLayer::new()
-        .allow_origin(Any)
-        .allow_methods(Any)
-        .allow_headers(Any);
+    // CORS layer — replaces the old wildcard `Access-Control-Allow-Origin: *`
+    // (Odin "Cross-Domain Misconfiguration" finding). Trusted origins come from
+    // EIR_GATEWAY_CORS_ALLOWED_ORIGINS (comma-separated); secure by default —
+    // unset/empty means no cross-origin access (same-origin callers unaffected).
+    let cors = {
+        let origins: Vec<axum::http::HeaderValue> = std::env::var("EIR_GATEWAY_CORS_ALLOWED_ORIGINS")
+            .unwrap_or_default()
+            .split(',')
+            .map(|s| s.trim())
+            .filter(|s| !s.is_empty())
+            .filter_map(|s| s.parse().ok())
+            .collect();
+        let base = CorsLayer::new().allow_methods(Any).allow_headers(Any);
+        if origins.is_empty() {
+            tracing::warn!("EIR_GATEWAY_CORS_ALLOWED_ORIGINS unset — cross-origin requests blocked (same-origin only)");
+            base
+        } else {
+            base.allow_origin(AllowOrigin::list(origins))
+        }
+    };
 
     // Build application
     // Middleware stack (applied bottom-up):
