@@ -953,7 +953,7 @@ $ignoreErrors[] = [
 ];
 $ignoreErrors[] = [
     'message' => '#^Parameter \\#1 \\$text of function text expects string, mixed given\\.$#',
-    'count' => 18,
+    'count' => 20,
     'path' => __DIR__ . '/../../controllers/C_Prescription.class.php',
 ];
 $ignoreErrors[] = [
@@ -973,7 +973,7 @@ $ignoreErrors[] = [
 ];
 $ignoreErrors[] = [
     'message' => '#^Parameter \\#3 \\$subject of function preg_replace expects array\\<float\\|int\\|string\\>\\|string, array given\\.$#',
-    'count' => 2,
+    'count' => 1,
     'path' => __DIR__ . '/../../controllers/C_Prescription.class.php',
 ];
 $ignoreErrors[] = [
@@ -9432,11 +9432,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/../../interface/modules/custom_modules/oe-module-comlink-telehealth/src/Controller/TeleconferenceRoomController.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$logger of class Comlink\\\\OpenEMR\\\\Modules\\\\TeleHealthModule\\\\Services\\\\TelehealthConfigurationVerifier constructor expects OpenEMR\\\\Common\\\\Logging\\\\SystemLogger, Psr\\\\Log\\\\LoggerInterface given\\.$#',
-    'count' => 1,
-    'path' => __DIR__ . '/../../interface/modules/custom_modules/oe-module-comlink-telehealth/src/Controller/TeleconferenceRoomController.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Parameter \\#1 \\$message of class InvalidArgumentException constructor expects string, mixed given\\.$#',
     'count' => 4,
     'path' => __DIR__ . '/../../interface/modules/custom_modules/oe-module-comlink-telehealth/src/Controller/TeleconferenceRoomController.php',
@@ -15603,7 +15598,7 @@ $ignoreErrors[] = [
 ];
 $ignoreErrors[] = [
     'message' => '#^Parameter \\#2 \\$value of static method OpenEMR\\\\Common\\\\Acl\\\\AclMain\\:\\:aclCheckCore\\(\\) expects string, mixed given\\.$#',
-    'count' => 2,
+    'count' => 3,
     'path' => __DIR__ . '/../../interface/patient_file/encounter/forms.php',
 ];
 $ignoreErrors[] = [
@@ -28747,7 +28742,52 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/../../portal/lib/appsql.class.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$success of method OpenEMR\\\\Common\\\\Logging\\\\EventAuditLogger\\:\\:recordLogItem\\(\\) expects int, mixed given\\.$#',
+    'count' => 1,
+    'path' => __DIR__ . '/../../portal/lib/appsql.class.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#10 \\$ccdaDocId of method OpenEMR\\\\Common\\\\Logging\\\\EventAuditLogger\\:\\:recordLogItem\\(\\) expects int\\|null, mixed given\\.$#',
+    'count' => 1,
+    'path' => __DIR__ . '/../../portal/lib/appsql.class.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#11 \\$user_notes of method OpenEMR\\\\Common\\\\Logging\\\\EventAuditLogger\\:\\:recordLogItem\\(\\) expects string, mixed given\\.$#',
+    'count' => 1,
+    'path' => __DIR__ . '/../../portal/lib/appsql.class.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Parameter \\#2 \\$binds of function sqlStatementNoLog expects array, mixed given\\.$#',
+    'count' => 1,
+    'path' => __DIR__ . '/../../portal/lib/appsql.class.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$event of method OpenEMR\\\\Common\\\\Logging\\\\EventAuditLogger\\:\\:recordLogItem\\(\\) expects string, mixed given\\.$#',
+    'count' => 1,
+    'path' => __DIR__ . '/../../portal/lib/appsql.class.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#3 \\$user of method OpenEMR\\\\Common\\\\Logging\\\\EventAuditLogger\\:\\:recordLogItem\\(\\) expects string\\|null, mixed given\\.$#',
+    'count' => 1,
+    'path' => __DIR__ . '/../../portal/lib/appsql.class.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#4 \\$group of method OpenEMR\\\\Common\\\\Logging\\\\EventAuditLogger\\:\\:recordLogItem\\(\\) expects string\\|null, mixed given\\.$#',
+    'count' => 1,
+    'path' => __DIR__ . '/../../portal/lib/appsql.class.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#5 \\$comments of method OpenEMR\\\\Common\\\\Logging\\\\EventAuditLogger\\:\\:recordLogItem\\(\\) expects string, mixed given\\.$#',
+    'count' => 1,
+    'path' => __DIR__ . '/../../portal/lib/appsql.class.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#6 \\$patientId of method OpenEMR\\\\Common\\\\Logging\\\\EventAuditLogger\\:\\:recordLogItem\\(\\) expects int\\|null, mixed given\\.$#',
+    'count' => 1,
+    'path' => __DIR__ . '/../../portal/lib/appsql.class.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#8 \\$logFrom of method OpenEMR\\\\Common\\\\Logging\\\\EventAuditLogger\\:\\:recordLogItem\\(\\) expects string, mixed given\\.$#',
     'count' => 1,
     'path' => __DIR__ . '/../../portal/lib/appsql.class.php',
 ];
@@ -32087,31 +32127,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/../../src/Common/Auth/AuthUtils.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$ipString of method OpenEMR\\\\Common\\\\Auth\\\\AuthUtils\\:\\:checkIpLoginFailedCounter\\(\\) expects string, mixed given\\.$#',
-    'count' => 1,
-    'path' => __DIR__ . '/../../src/Common/Auth/AuthUtils.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$ipString of method OpenEMR\\\\Common\\\\Auth\\\\AuthUtils\\:\\:incrementIpLoginFailedCounter\\(\\) expects string, mixed given\\.$#',
-    'count' => 12,
-    'path' => __DIR__ . '/../../src/Common/Auth/AuthUtils.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$ipString of method OpenEMR\\\\Common\\\\Auth\\\\AuthUtils\\:\\:resetIpLoginFailedCounter\\(\\) expects string, mixed given\\.$#',
-    'count' => 1,
-    'path' => __DIR__ . '/../../src/Common/Auth/AuthUtils.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$ipString of method OpenEMR\\\\Common\\\\Auth\\\\AuthUtils\\:\\:setupIpLoginFailedCounter\\(\\) expects string, mixed given\\.$#',
-    'count' => 1,
-    'path' => __DIR__ . '/../../src/Common/Auth/AuthUtils.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$ip_string of method OpenEMR\\\\Common\\\\Auth\\\\AuthUtils\\:\\:notifyIpBlock\\(\\) expects string, mixed given\\.$#',
-    'count' => 1,
-    'path' => __DIR__ . '/../../src/Common/Auth/AuthUtils.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Parameter \\#1 \\$known_string of function hash_equals expects string, mixed given\\.$#',
     'count' => 1,
     'path' => __DIR__ . '/../../src/Common/Auth/AuthUtils.php',
@@ -33102,33 +33117,18 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/../../src/Common/Logging/EventAuditLogger.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$stream of function fclose expects resource, resource\\|true given\\.$#',
+    'message' => '#^Parameter \\#1 \\$success of method OpenEMR\\\\Common\\\\Logging\\\\EventAuditLogger\\:\\:recordLogItem\\(\\) expects int, mixed given\\.$#',
+    'count' => 2,
+    'path' => __DIR__ . '/../../src/Common/Logging/EventAuditLogger.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#11 \\$SSL_CLIENT_S_DN_CN of class OpenEMR\\\\Common\\\\Logging\\\\Audit\\\\Event constructor expects string, mixed given\\.$#',
     'count' => 1,
     'path' => __DIR__ . '/../../src/Common/Logging/EventAuditLogger.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$stream of function fwrite expects resource, resource\\|true given\\.$#',
-    'count' => 1,
-    'path' => __DIR__ . '/../../src/Common/Logging/EventAuditLogger.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$value of method OpenEMR\\\\Common\\\\Crypto\\\\CryptoInterface\\:\\:encryptStandard\\(\\) expects string\\|null, mixed given\\.$#',
-    'count' => 4,
-    'path' => __DIR__ . '/../../src/Common/Logging/EventAuditLogger.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#10 \\.\\.\\.\\$values of function sprintf expects bool\\|float\\|int\\|string\\|null, mixed given\\.$#',
-    'count' => 1,
-    'path' => __DIR__ . '/../../src/Common/Logging/EventAuditLogger.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#11 \\.\\.\\.\\$values of function sprintf expects bool\\|float\\|int\\|string\\|null, mixed given\\.$#',
-    'count' => 1,
-    'path' => __DIR__ . '/../../src/Common/Logging/EventAuditLogger.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#13 \\.\\.\\.\\$values of function sprintf expects bool\\|float\\|int\\|string\\|null, mixed given\\.$#',
-    'count' => 1,
+    'message' => '#^Parameter \\#2 \\$event of method OpenEMR\\\\Common\\\\Logging\\\\EventAuditLogger\\:\\:recordLogItem\\(\\) expects string, mixed given\\.$#',
+    'count' => 2,
     'path' => __DIR__ . '/../../src/Common/Logging/EventAuditLogger.php',
 ];
 $ignoreErrors[] = [
@@ -33137,17 +33137,22 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/../../src/Common/Logging/EventAuditLogger.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\.\\.\\.\\$values of function sprintf expects bool\\|float\\|int\\|string\\|null, mixed given\\.$#',
-    'count' => 1,
+    'message' => '#^Parameter \\#3 \\$user of method OpenEMR\\\\Common\\\\Logging\\\\EventAuditLogger\\:\\:recordLogItem\\(\\) expects string\\|null, mixed given\\.$#',
+    'count' => 4,
     'path' => __DIR__ . '/../../src/Common/Logging/EventAuditLogger.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#3 \\.\\.\\.\\$values of function sprintf expects bool\\|float\\|int\\|string\\|null, mixed given\\.$#',
-    'count' => 1,
+    'message' => '#^Parameter \\#4 \\$group of method OpenEMR\\\\Common\\\\Logging\\\\EventAuditLogger\\:\\:recordLogItem\\(\\) expects string\\|null, mixed given\\.$#',
+    'count' => 4,
     'path' => __DIR__ . '/../../src/Common/Logging/EventAuditLogger.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Parameter \\#5 \\$comments of method OpenEMR\\\\Common\\\\Logging\\\\EventAuditLogger\\:\\:newEvent\\(\\) expects string, mixed given\\.$#',
+    'count' => 1,
+    'path' => __DIR__ . '/../../src/Common/Logging/EventAuditLogger.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#6 \\$patientId of method OpenEMR\\\\Common\\\\Logging\\\\EventAuditLogger\\:\\:recordLogItem\\(\\) expects int\\|null, mixed given\\.$#',
     'count' => 1,
     'path' => __DIR__ . '/../../src/Common/Logging/EventAuditLogger.php',
 ];
@@ -33157,12 +33162,22 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/../../src/Common/Logging/EventAuditLogger.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#7 \\.\\.\\.\\$values of function sprintf expects bool\\|float\\|int\\|string\\|null, mixed given\\.$#',
+    'message' => '#^Parameter \\#7 \\$category of method OpenEMR\\\\Common\\\\Logging\\\\EventAuditLogger\\:\\:recordLogItem\\(\\) expects string\\|null, mixed given\\.$#',
     'count' => 1,
     'path' => __DIR__ . '/../../src/Common/Logging/EventAuditLogger.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#9 \\.\\.\\.\\$values of function sprintf expects bool\\|float\\|int\\|string\\|null, mixed given\\.$#',
+    'message' => '#^Parameter \\#9 \\$menuItemId of method OpenEMR\\\\Common\\\\Logging\\\\EventAuditLogger\\:\\:recordLogItem\\(\\) expects int\\|null, int\\|string\\|false given\\.$#',
+    'count' => 1,
+    'path' => __DIR__ . '/../../src/Common/Logging/EventAuditLogger.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\$serverAddress of class OpenEMR\\\\Common\\\\Logging\\\\Audit\\\\AtnaSink constructor expects string, mixed given\\.$#',
+    'count' => 1,
+    'path' => __DIR__ . '/../../src/Common/Logging/EventAuditLogger.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\$serverName of class OpenEMR\\\\Common\\\\Logging\\\\Audit\\\\AtnaSink constructor expects string, mixed given\\.$#',
     'count' => 1,
     'path' => __DIR__ . '/../../src/Common/Logging/EventAuditLogger.php',
 ];
@@ -33337,7 +33352,7 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/../../src/Common/Session/SessionUtil.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$context of method OpenEMR\\\\Common\\\\Logging\\\\SystemLogger\\:\\:debug\\(\\) expects array, mixed given\\.$#',
+    'message' => '#^Parameter \\#2 \\$context of method Psr\\\\Log\\\\LoggerInterface\\:\\:debug\\(\\) expects array\\<mixed\\>, mixed given\\.$#',
     'count' => 2,
     'path' => __DIR__ . '/../../src/Common/Session/SessionUtil.php',
 ];
@@ -62792,7 +62807,7 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/../../src/FHIR/SMART/SMARTLaunchToken.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$context of method OpenEMR\\\\Common\\\\Logging\\\\SystemLogger\\:\\:debug\\(\\) expects array, mixed given\\.$#',
+    'message' => '#^Parameter \\#2 \\$context of method Psr\\\\Log\\\\LoggerInterface\\:\\:debug\\(\\) expects array\\<mixed\\>, mixed given\\.$#',
     'count' => 1,
     'path' => __DIR__ . '/../../src/FHIR/SMART/SMARTLaunchToken.php',
 ];
@@ -63422,11 +63437,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/../../src/RestControllers/Authorization/BearerTokenAuthorizationStrategy.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$systemLogger of method OpenEMR\\\\RestControllers\\\\Authorization\\\\BearerTokenAuthorizationStrategy\\:\\:setSystemLogger\\(\\) expects OpenEMR\\\\Common\\\\Logging\\\\SystemLogger, Psr\\\\Log\\\\LoggerInterface given\\.$#',
-    'count' => 1,
-    'path' => __DIR__ . '/../../src/RestControllers/Authorization/BearerTokenAuthorizationStrategy.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Parameter \\#1 \\$userId of class OpenEMR\\\\Common\\\\Auth\\\\UuidUserAccount constructor expects string, mixed given\\.$#',
     'count' => 1,
     'path' => __DIR__ . '/../../src/RestControllers/Authorization/BearerTokenAuthorizationStrategy.php',
@@ -63587,11 +63597,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/../../src/RestControllers/AuthorizationController.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$logger of method OpenEMR\\\\Services\\\\JWTClientAuthenticationService\\:\\:setLogger\\(\\) expects Psr\\\\Log\\\\LoggerInterface, OpenEMR\\\\Common\\\\Logging\\\\SystemLogger\\|null given\\.$#',
-    'count' => 1,
-    'path' => __DIR__ . '/../../src/RestControllers/AuthorizationController.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Parameter \\#1 \\$name of method OpenEMR\\\\FHIR\\\\SMART\\\\ExternalClinicalDecisionSupport\\\\DecisionSupportInterventionEntity\\:\\:setFieldValue\\(\\) expects string, mixed given\\.$#',
     'count' => 1,
     'path' => __DIR__ . '/../../src/RestControllers/AuthorizationController.php',
@@ -63623,51 +63628,6 @@ $ignoreErrors[] = [
 ];
 $ignoreErrors[] = [
     'message' => '#^Parameter \\#1 \\$string of method Psr\\\\Http\\\\Message\\\\StreamInterface\\:\\:write\\(\\) expects string, string\\|false given\\.$#',
-    'count' => 1,
-    'path' => __DIR__ . '/../../src/RestControllers/AuthorizationController.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$systemLogger of method OpenEMR\\\\Common\\\\Auth\\\\OpenIDConnect\\\\Grant\\\\CustomAuthCodeGrant\\:\\:setSystemLogger\\(\\) expects OpenEMR\\\\Common\\\\Logging\\\\SystemLogger, OpenEMR\\\\Common\\\\Logging\\\\SystemLogger\\|null given\\.$#',
-    'count' => 1,
-    'path' => __DIR__ . '/../../src/RestControllers/AuthorizationController.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$systemLogger of method OpenEMR\\\\Common\\\\Auth\\\\OpenIDConnect\\\\Grant\\\\CustomClientCredentialsGrant\\:\\:setSystemLogger\\(\\) expects OpenEMR\\\\Common\\\\Logging\\\\SystemLogger, OpenEMR\\\\Common\\\\Logging\\\\SystemLogger\\|null given\\.$#',
-    'count' => 1,
-    'path' => __DIR__ . '/../../src/RestControllers/AuthorizationController.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$systemLogger of method OpenEMR\\\\Common\\\\Auth\\\\OpenIDConnect\\\\IdTokenSMARTResponse\\:\\:setSystemLogger\\(\\) expects OpenEMR\\\\Common\\\\Logging\\\\SystemLogger, OpenEMR\\\\Common\\\\Logging\\\\SystemLogger\\|null given\\.$#',
-    'count' => 1,
-    'path' => __DIR__ . '/../../src/RestControllers/AuthorizationController.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$systemLogger of method OpenEMR\\\\Common\\\\Auth\\\\OpenIDConnect\\\\Repositories\\\\AccessTokenRepository\\:\\:setSystemLogger\\(\\) expects OpenEMR\\\\Common\\\\Logging\\\\SystemLogger, OpenEMR\\\\Common\\\\Logging\\\\SystemLogger\\|null given\\.$#',
-    'count' => 1,
-    'path' => __DIR__ . '/../../src/RestControllers/AuthorizationController.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$systemLogger of method OpenEMR\\\\Common\\\\Auth\\\\OpenIDConnect\\\\Repositories\\\\ClientRepository\\:\\:setSystemLogger\\(\\) expects OpenEMR\\\\Common\\\\Logging\\\\SystemLogger, OpenEMR\\\\Common\\\\Logging\\\\SystemLogger\\|null given\\.$#',
-    'count' => 1,
-    'path' => __DIR__ . '/../../src/RestControllers/AuthorizationController.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$systemLogger of method OpenEMR\\\\Common\\\\Auth\\\\OpenIDConnect\\\\Repositories\\\\RefreshTokenRepository\\:\\:setSystemLogger\\(\\) expects OpenEMR\\\\Common\\\\Logging\\\\SystemLogger, OpenEMR\\\\Common\\\\Logging\\\\SystemLogger\\|null given\\.$#',
-    'count' => 1,
-    'path' => __DIR__ . '/../../src/RestControllers/AuthorizationController.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$systemLogger of method OpenEMR\\\\Common\\\\Auth\\\\OpenIDConnect\\\\Repositories\\\\ScopeRepository\\:\\:setSystemLogger\\(\\) expects OpenEMR\\\\Common\\\\Logging\\\\SystemLogger, OpenEMR\\\\Common\\\\Logging\\\\SystemLogger\\|null given\\.$#',
-    'count' => 1,
-    'path' => __DIR__ . '/../../src/RestControllers/AuthorizationController.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$systemLogger of method OpenEMR\\\\Common\\\\Auth\\\\OpenIDConnect\\\\Repositories\\\\UserRepository\\:\\:setSystemLogger\\(\\) expects OpenEMR\\\\Common\\\\Logging\\\\SystemLogger, OpenEMR\\\\Common\\\\Logging\\\\SystemLogger\\|null given\\.$#',
-    'count' => 1,
-    'path' => __DIR__ . '/../../src/RestControllers/AuthorizationController.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$systemLogger of method OpenEMR\\\\RestControllers\\\\TokenIntrospectionRestController\\:\\:setSystemLogger\\(\\) expects OpenEMR\\\\Common\\\\Logging\\\\SystemLogger, OpenEMR\\\\Common\\\\Logging\\\\SystemLogger\\|null given\\.$#',
     'count' => 1,
     'path' => __DIR__ . '/../../src/RestControllers/AuthorizationController.php',
 ];
@@ -63883,11 +63843,6 @@ $ignoreErrors[] = [
 ];
 $ignoreErrors[] = [
     'message' => '#^Parameter \\#1 \\$fhirSearchParameters of method OpenEMR\\\\Services\\\\FHIR\\\\FhirServiceBase\\:\\:getAll\\(\\) expects array, mixed given\\.$#',
-    'count' => 1,
-    'path' => __DIR__ . '/../../src/RestControllers/FHIR/FhirCareTeamRestController.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$systemLogger of method OpenEMR\\\\Services\\\\FHIR\\\\FhirServiceBase\\:\\:setSystemLogger\\(\\) expects OpenEMR\\\\Common\\\\Logging\\\\SystemLogger, mixed given\\.$#',
     'count' => 1,
     'path' => __DIR__ . '/../../src/RestControllers/FHIR/FhirCareTeamRestController.php',
 ];
@@ -64422,22 +64377,27 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/../../src/RestControllers/SMART/SMARTAuthorizationController.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$systemLogger of method OpenEMR\\\\Common\\\\Auth\\\\OpenIDConnect\\\\Repositories\\\\ClientRepository\\:\\:setSystemLogger\\(\\) expects OpenEMR\\\\Common\\\\Logging\\\\SystemLogger, Psr\\\\Log\\\\LoggerInterface given\\.$#',
-    'count' => 1,
-    'path' => __DIR__ . '/../../src/RestControllers/SMART/SMARTAuthorizationController.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Parameter \\#1 \\$scopeString of method OpenEMR\\\\RestControllers\\\\SMART\\\\ScopePermissionParser\\:\\:parseScopeString\\(\\) expects string, mixed given\\.$#',
     'count' => 1,
     'path' => __DIR__ . '/../../src/RestControllers/SMART/ScopePermissionParser.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$publicKey of method OpenEMR\\\\RestControllers\\\\Authorization\\\\BearerTokenAuthorizationStrategy\\:\\:setPublicKey\\(\\) expects League\\\\OAuth2\\\\Server\\\\CryptKey\\|string, mixed given\\.$#',
+    'message' => '#^Parameter \\#12 \\$api of method OpenEMR\\\\Common\\\\Logging\\\\EventAuditLogger\\:\\:recordLogItem\\(\\) expects array\\{user_id\\: int, patient_id\\: int, method\\: string, request\\: string, request_url\\: string, request_body\\: string, response\\: string\\}\\|null, array\\{user_id\\: int, patient_id\\: int, method\\: string, request\\: string, request_url\\: string, request_body\\: string\\|false, response\\: string\\|false\\} given\\.$#',
     'count' => 1,
-    'path' => __DIR__ . '/../../src/RestControllers/Subscriber/AuthorizationListener.php',
+    'path' => __DIR__ . '/../../src/RestControllers/Subscriber/ApiResponseLoggerListener.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$systemLogger of method OpenEMR\\\\RestControllers\\\\Authorization\\\\SkipAuthorizationStrategy\\:\\:setSystemLogger\\(\\) expects OpenEMR\\\\Common\\\\Logging\\\\SystemLogger, Psr\\\\Log\\\\LoggerInterface given\\.$#',
+    'message' => '#^Parameter \\#3 \\$user of method OpenEMR\\\\Common\\\\Logging\\\\EventAuditLogger\\:\\:recordLogItem\\(\\) expects string\\|null, mixed given\\.$#',
+    'count' => 1,
+    'path' => __DIR__ . '/../../src/RestControllers/Subscriber/ApiResponseLoggerListener.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#4 \\$group of method OpenEMR\\\\Common\\\\Logging\\\\EventAuditLogger\\:\\:recordLogItem\\(\\) expects string\\|null, mixed given\\.$#',
+    'count' => 1,
+    'path' => __DIR__ . '/../../src/RestControllers/Subscriber/ApiResponseLoggerListener.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$publicKey of method OpenEMR\\\\RestControllers\\\\Authorization\\\\BearerTokenAuthorizationStrategy\\:\\:setPublicKey\\(\\) expects League\\\\OAuth2\\\\Server\\\\CryptKey\\|string, mixed given\\.$#',
     'count' => 1,
     'path' => __DIR__ . '/../../src/RestControllers/Subscriber/AuthorizationListener.php',
 ];
@@ -64450,16 +64410,6 @@ $ignoreErrors[] = [
     'message' => '#^Parameter \\#2 \\$values of method Symfony\\\\Component\\\\HttpFoundation\\\\ResponseHeaderBag\\:\\:set\\(\\) expects array\\<string\\>\\|string\\|null, mixed given\\.$#',
     'count' => 1,
     'path' => __DIR__ . '/../../src/RestControllers/Subscriber/CORSListener.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$systemLogger of method OpenEMR\\\\RestControllers\\\\AuthorizationController\\:\\:setSystemLogger\\(\\) expects OpenEMR\\\\Common\\\\Logging\\\\SystemLogger, Psr\\\\Log\\\\LoggerInterface given\\.$#',
-    'count' => 1,
-    'path' => __DIR__ . '/../../src/RestControllers/Subscriber/OAuth2AuthorizationListener.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$logger of class OpenEMR\\\\Services\\\\FHIR\\\\Utils\\\\SearchRequestNormalizer constructor expects OpenEMR\\\\Common\\\\Logging\\\\SystemLogger, OpenEMR\\\\Common\\\\Logging\\\\SystemLogger\\|null given\\.$#',
-    'count' => 1,
-    'path' => __DIR__ . '/../../src/RestControllers/Subscriber/RoutesExtensionListener.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Parameter \\#1 \\$filename of function file_exists expects string, mixed given\\.$#',
@@ -64502,18 +64452,8 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/../../src/RestControllers/TokenIntrospectionRestController.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$logger of method OpenEMR\\\\Services\\\\JWTClientAuthenticationService\\:\\:setLogger\\(\\) expects Psr\\\\Log\\\\LoggerInterface, OpenEMR\\\\Common\\\\Logging\\\\SystemLogger\\|null given\\.$#',
-    'count' => 1,
-    'path' => __DIR__ . '/../../src/RestControllers/TokenIntrospectionRestController.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Parameter \\#1 \\$string of method Psr\\\\Http\\\\Message\\\\StreamInterface\\:\\:write\\(\\) expects string, string\\|false given\\.$#',
     'count' => 2,
-    'path' => __DIR__ . '/../../src/RestControllers/TokenIntrospectionRestController.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$systemLogger of method OpenEMR\\\\Common\\\\Auth\\\\OpenIDConnect\\\\Repositories\\\\ClientRepository\\:\\:setSystemLogger\\(\\) expects OpenEMR\\\\Common\\\\Logging\\\\SystemLogger, OpenEMR\\\\Common\\\\Logging\\\\SystemLogger\\|null given\\.$#',
-    'count' => 1,
     'path' => __DIR__ . '/../../src/RestControllers/TokenIntrospectionRestController.php',
 ];
 $ignoreErrors[] = [
@@ -70862,11 +70802,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/../../src/Services/FHIR/Observation/FhirObservationObservationFormService.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$systemLogger of method OpenEMR\\\\Services\\\\ObservationService\\:\\:setSystemLogger\\(\\) expects OpenEMR\\\\Common\\\\Logging\\\\SystemLogger, OpenEMR\\\\Common\\\\Logging\\\\SystemLogger\\|null given\\.$#',
-    'count' => 1,
-    'path' => __DIR__ . '/../../src/Services/FHIR/Observation/FhirObservationObservationFormService.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Parameter \\#1 \\$text of method OpenEMR\\\\FHIR\\\\R4\\\\FHIRElement\\\\FHIRAnnotation\\:\\:setText\\(\\) expects OpenEMR\\\\FHIR\\\\R4\\\\FHIRElement\\\\FHIRMarkdown, mixed given\\.$#',
     'count' => 1,
     'path' => __DIR__ . '/../../src/Services/FHIR/Observation/FhirObservationObservationFormService.php',
@@ -73552,7 +73487,7 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/../../src/Services/ProcedureProviderService.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$context of method OpenEMR\\\\Common\\\\Logging\\\\SystemLogger\\:\\:error\\(\\) expects array, OpenEMR\\\\Services\\\\Search\\\\SearchFieldException given\\.$#',
+    'message' => '#^Parameter \\#2 \\$context of method Psr\\\\Log\\\\LoggerInterface\\:\\:error\\(\\) expects array\\<mixed\\>, OpenEMR\\\\Services\\\\Search\\\\SearchFieldException given\\.$#',
     'count' => 1,
     'path' => __DIR__ . '/../../src/Services/ProcedureProviderService.php',
 ];
@@ -75547,6 +75482,11 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/../../tests/Tests/Isolated/Billing/BillingLoggerTest.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Parameter \\$patientId of method OpenEMR\\\\Common\\\\Logging\\\\EventAuditLogger\\:\\:recordLogItem\\(\\) expects int\\|null, string given\\.$#',
+    'count' => 1,
+    'path' => __DIR__ . '/../../tests/Tests/Isolated/Common/Logging/EventAuditLoggerTest.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Parameter \\#1 \\$string of function htmlspecialchars expects string, mixed given\\.$#',
     'count' => 2,
     'path' => __DIR__ . '/../../tests/Tests/Isolated/Common/Utils/PaginationUtilsTest.php',
@@ -76362,11 +76302,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/../../tests/Tests/Unit/ClinicalDecisionRules/ControllerEditTest.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$controller of class OpenEMR\\\\ClinicalDecisionRules\\\\Interface\\\\ActionRouter constructor expects BaseController, mixed given\\.$#',
-    'count' => 1,
-    'path' => __DIR__ . '/../../tests/Tests/Unit/ClinicalDecisionRules/ControllerRouterTest.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Parameter \\#2 \\$haystack of method PHPUnit\\\\Framework\\\\Assert\\:\\:assertStringContainsString\\(\\) expects string, mixed given\\.$#',
     'count' => 3,
     'path' => __DIR__ . '/../../tests/Tests/Unit/ClinicalDecisionRules/ReminderIntervalDetailTest.php',
@@ -76480,6 +76415,11 @@ $ignoreErrors[] = [
     'message' => '#^Parameter \\#3 \\$message of method PHPUnit\\\\Framework\\\\Assert\\:\\:assertEquals\\(\\) expects string, mixed given\\.$#',
     'count' => 1,
     'path' => __DIR__ . '/../../tests/Tests/Unit/Common/Forms/FormVitalsTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#6 \\$patientId of method OpenEMR\\\\Common\\\\Logging\\\\EventAuditLogger\\:\\:recordLogItem\\(\\) expects int\\|null, string given\\.$#',
+    'count' => 1,
+    'path' => __DIR__ . '/../../tests/Tests/Unit/Common/Logging/EventAuditLoggerTest.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Parameter \\#2 \\$haystack of method PHPUnit\\\\Framework\\\\Assert\\:\\:assertStringContainsString\\(\\) expects string, string\\|false given\\.$#',
