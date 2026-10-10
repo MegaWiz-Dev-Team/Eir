@@ -133,7 +133,7 @@ INSERT INTO `lbf_data` (`form_id`, `field_id`, `field_value`) VALUES
     (5011, 'pressure_efficacy', '94.2'),
     (5011, 'compliance_status', 'eligible'),
     (5011, 'clinical_notes',    'ผู้ป่วยใช้เครื่องสม่ำเสมอ ค่า AHI อยู่ในเกณฑ์ดี ไม่มีปัญหา leak'),
-    (5011, 'source_gcs_uri',    'gs://mega-care-reports/detail-reports/SB-PT-001/2026/03/20/report.pdf')
+    (5011, 'source_gcs_uri',    'gs://example-reports-bucket/detail-reports/SB-PT-001/2026/03/20/report.pdf')
 ON DUPLICATE KEY UPDATE `field_value` = VALUES(`field_value`);
 
 -- Patient 1001 — Day 2: Still good (Green)
@@ -153,7 +153,7 @@ INSERT INTO `lbf_data` (`form_id`, `field_id`, `field_value`) VALUES
     (5012, 'pressure_efficacy', '95.1'),
     (5012, 'compliance_status', 'eligible'),
     (5012, 'clinical_notes',    'ข้อมูลต่อเนื่อง ค่าปกติทั้งหมด'),
-    (5012, 'source_gcs_uri',    'gs://mega-care-reports/detail-reports/SB-PT-001/2026/03/21/report.pdf')
+    (5012, 'source_gcs_uri',    'gs://example-reports-bucket/detail-reports/SB-PT-001/2026/03/21/report.pdf')
 ON DUPLICATE KEY UPDATE `field_value` = VALUES(`field_value`);
 
 -- Patient 1002 — Yellow: usage low, AHI moderate
@@ -173,7 +173,7 @@ INSERT INTO `lbf_data` (`form_id`, `field_id`, `field_value`) VALUES
     (5013, 'pressure_efficacy', '72.8'),
     (5013, 'compliance_status', 'not_eligible'),
     (5013, 'clinical_notes',    'ผู้ป่วยใช้เครื่องน้อยกว่า 4 ชม. leak สูง อาจต้องปรับ mask'),
-    (5013, 'source_gcs_uri',    'gs://mega-care-reports/detail-reports/SB-PT-002/2026/03/20/report.pdf')
+    (5013, 'source_gcs_uri',    'gs://example-reports-bucket/detail-reports/SB-PT-002/2026/03/20/report.pdf')
 ON DUPLICATE KEY UPDATE `field_value` = VALUES(`field_value`);
 
 -- Patient 1003 — Red: very high AHI, critical
@@ -193,7 +193,7 @@ INSERT INTO `lbf_data` (`form_id`, `field_id`, `field_value`) VALUES
     (5014, 'pressure_efficacy', '55.1'),
     (5014, 'compliance_status', 'not_eligible'),
     (5014, 'clinical_notes',    'AHI สูงมาก 28.4 ต้องพบแพทย์ด่วน Leak สูง อาจต้องเปลี่ยน mask CSR duration 35 นาที ส่งต่อ sleep specialist'),
-    (5014, 'source_gcs_uri',    'gs://mega-care-reports/detail-reports/SB-PT-003/2026/03/20/report.pdf')
+    (5014, 'source_gcs_uri',    'gs://example-reports-bucket/detail-reports/SB-PT-003/2026/03/20/report.pdf')
 ON DUPLICATE KEY UPDATE `field_value` = VALUES(`field_value`);
 
 -- ============================
@@ -234,7 +234,7 @@ INSERT INTO `migration_log` (
 
     -- Failed example
     ('SB-PT-003', 1003, 'compliance_report', '2026-Q1', 'failed',
-     'GCS file not found: gs://mega-care-reports/compliance/SB-PT-003/2026-Q1.pdf',
+     'GCS file not found: gs://example-reports-bucket/compliance/SB-PT-003/2026-Q1.pdf',
      'SB-PT-003:compliance_report:2026-Q1')
 ON DUPLICATE KEY UPDATE `status` = VALUES(`status`);
 

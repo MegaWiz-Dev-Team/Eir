@@ -209,9 +209,9 @@ steps:
 | 1 | Operation Flow (Apnea Care) | `Eir/docs/Apnea_Care_Operation_Flow.md` |
 | 2 | Gap Analysis (Telemedicine) | `Eir/docs/Apnea_Care_Gap_Analysis.md` |
 | 3 | Data Migration Plan | `Eir/docs/Apnea_Data_Migration_Plan.md` |
-| 4 | Data Schema Mapping | `Eir/docs/Data_Mapping_MegaCare_to_Eir.md` |
+| 4 | Data Schema Mapping | (moved to the private document store) |
 | 5 | Migration Safety Review & Archive | `Eir/docs/Migration_Safety_Review_and_Archive_Plan.md` |
-| 6 | PDPA Consent Remediation Plan | `Eir/docs/PDPA_Consent_Remediation_Plan.md` |
+| 6 | PDPA Consent Remediation Plan | (moved to the private document store) |
 
 ---
 

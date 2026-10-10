@@ -126,7 +126,7 @@ Step 1: PRE-ARCHIVE VERIFICATION
 
 Step 2: EXPORT TO ARCHIVE
    ├── Export Firestore Collections → GCS (Coldline)
-   │   └── Bucket: gs://mega-care-clinical-archive/YYYY-MM-DD/
+   │   └── Bucket: gs://<clinical-archive-bucket>/YYYY-MM-DD/
    │       ├── prescriptions/
    │       ├── daily_reports/
    │       └── compliance_reports/
