@@ -236,8 +236,7 @@ Sprint 5 ของ Eir: PDPA Consent Remediation + Data Migration Readiness
 6. ทดสอบ T1-T8 บน Sandbox ก่อน Deploy Production
 
 เอกสารอ้างอิง:
-- Eir/docs/Data_Mapping_MegaCare_to_Eir.md
-- Eir/docs/PDPA_Consent_Remediation_Plan.md
+- Data schema mapping + PDPA consent remediation plan (private document store)
 - Eir/docs/Sandbox_and_Production_Environment_Plan.md
 - Eir/docs/Migration_Safety_Review_and_Archive_Plan.md
 ```
