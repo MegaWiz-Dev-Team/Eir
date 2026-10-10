@@ -88,6 +88,7 @@ open http://localhost:8300/docs    # API docs
 | `EIR_GATEWAY_PORT` | `8300` | Gateway listen port |
 | `BIFROST_URL` | `http://bifrost:8100` | Bifrost agent runtime |
 | `AUTH_ENABLED` | `false` | Enable bearer auth |
+| `EIR_GATEWAY_SECRET` | unset | Secret shared with OpenEMR (set the same value on the Eir container, >= 32 chars). Sent only to OpenEMR in `X-Eir-Gateway-Secret`; client copies of that header and of `X-Gateway` are dropped. Unset = OpenEMR never trusts the gateway and calls need their own Bearer token. With `AUTH_ENABLED=false` every caller that reaches the gateway is vouched for, so keep it off untrusted networks. |
 | `RATE_LIMIT_RPS` | `100` | Requests per second |
 | `CACHE_TTL_SECS` | `60` | Cache TTL |
 

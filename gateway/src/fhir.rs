@@ -11,6 +11,7 @@ use axum::{
 use std::sync::Arc;
 
 use crate::config::Config;
+use crate::upstream;
 
 /// Build the FHIR R4 proxy router.
 pub fn router() -> Router<Arc<Config>> {
@@ -55,9 +56,10 @@ async fn fhir_proxy_handler(
         &upstream_url,
     );
 
-    // Forward headers (except host), add FHIR-specific headers
+    // Forward headers (except host and any client-supplied gateway trust header),
+    // add FHIR-specific headers
     for (name, value) in request.headers().iter() {
-        if name != "host" {
+        if name != "host" && !upstream::is_trust_header(name.as_str()) {
             if let Ok(v) = value.to_str() {
                 builder = builder.header(name.as_str(), v);
             }
@@ -67,7 +69,7 @@ async fn fhir_proxy_handler(
     // FHIR-specific headers
     builder = builder.header("Accept", "application/fhir+json");
     builder = builder.header("X-FHIR-Version", "R4");
-    builder = builder.header("X-Gateway", "eir-gateway");
+    builder = upstream::with_gateway_identity(builder, &config);
     builder = builder.header("X-Gateway-Route", "fhir-r4");
 
     // Forward body
@@ -125,6 +127,17 @@ async fn fhir_proxy_handler(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[tokio::test]
+    async fn test_fhir_proxy_replaces_client_trust_headers_with_gateway_secret() {
+        use crate::proxy::tests::{send_forged, spawn_echo_upstream};
+        use crate::upstream::tests::{test_config, TEST_SECRET};
+        let upstream_url = spawn_echo_upstream().await;
+        let app = router().with_state(Arc::new(test_config(&upstream_url, Some(TEST_SECRET))));
+        let seen = send_forged(app, "/fhir/r4/Patient").await;
+        assert_eq!(seen["secret"], serde_json::json!([TEST_SECRET]));
+        assert_eq!(seen["marker"], serde_json::json!(["eir-gateway"]));
+    }
 
     #[test]
     fn test_fhir_router_creation() {

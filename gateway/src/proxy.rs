@@ -11,6 +11,7 @@ use axum::{
 use std::sync::Arc;
 
 use crate::config::Config;
+use crate::upstream;
 
 /// Build the catch-all proxy router.
 pub fn router() -> Router<Arc<Config>> {
@@ -45,9 +46,9 @@ async fn proxy_handler(
         &upstream_url,
     );
 
-    // Forward headers (except host)
+    // Forward headers (except host and any client-supplied gateway trust header)
     for (name, value) in request.headers().iter() {
-        if name != "host" {
+        if name != "host" && !upstream::is_trust_header(name.as_str()) {
             if let Ok(v) = value.to_str() {
                 builder = builder.header(name.as_str(), v);
             }
@@ -56,7 +57,7 @@ async fn proxy_handler(
 
     // Add proxy headers
     builder = builder.header("X-Forwarded-Proto", "http");
-    builder = builder.header("X-Gateway", "eir-gateway");
+    builder = upstream::with_gateway_identity(builder, &config);
 
     // Forward body
     let body_bytes = axum::body::to_bytes(request.into_body(), 10 * 1024 * 1024)
@@ -121,4 +122,72 @@ async fn proxy_handler(
     *response.headers_mut() = response_headers;
 
     Ok(response)
+}
+
+#[cfg(test)]
+pub(crate) mod tests {
+    use super::*;
+    use crate::upstream::tests::{test_config, TEST_SECRET};
+    use crate::upstream::{GATEWAY_MARKER_HEADER, GATEWAY_SECRET_HEADER};
+    use axum::{body::to_bytes, http::Request as HttpRequest, Json};
+    use tower::ServiceExt;
+
+    /// Local stand-in for OpenEMR that echoes the trust headers it received.
+    pub(crate) async fn spawn_echo_upstream() -> String {
+        async fn echo(headers: HeaderMap) -> Json<serde_json::Value> {
+            let values = |name: &str| -> Vec<String> {
+                headers
+                    .get_all(name)
+                    .iter()
+                    .map(|v| v.to_str().unwrap_or("").to_string())
+                    .collect()
+            };
+            Json(serde_json::json!({
+                "secret": values(GATEWAY_SECRET_HEADER),
+                "marker": values(GATEWAY_MARKER_HEADER),
+                "authorization": values("authorization"),
+            }))
+        }
+        let app = Router::new().fallback(echo);
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let addr = listener.local_addr().unwrap();
+        tokio::spawn(async move { axum::serve(listener, app).await.unwrap() });
+        format!("http://{addr}")
+    }
+
+    pub(crate) async fn send_forged(app: Router, path: &str) -> serde_json::Value {
+        let request = HttpRequest::builder()
+            .uri(path)
+            .header("X-Gateway", "eir-gateway")
+            .header("X-Eir-Gateway-Secret", "client-forged-secret")
+            .header("Authorization", "Bearer caller-token")
+            .body(Body::empty())
+            .unwrap();
+        let response = app.oneshot(request).await.unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+        let body = to_bytes(response.into_body(), 1 << 20).await.unwrap();
+        serde_json::from_slice(&body).unwrap()
+    }
+
+    #[tokio::test]
+    async fn test_proxy_replaces_client_trust_headers_with_gateway_secret() {
+        let upstream_url = spawn_echo_upstream().await;
+        let app = router().with_state(Arc::new(test_config(&upstream_url, Some(TEST_SECRET))));
+        let seen = send_forged(app, "/apis/default/api/patient").await;
+        assert_eq!(seen["secret"], serde_json::json!([TEST_SECRET]));
+        assert_eq!(seen["marker"], serde_json::json!(["eir-gateway"]));
+        // caller credentials still pass through
+        assert_eq!(
+            seen["authorization"],
+            serde_json::json!(["Bearer caller-token"])
+        );
+    }
+
+    #[tokio::test]
+    async fn test_proxy_without_secret_forwards_no_secret() {
+        let upstream_url = spawn_echo_upstream().await;
+        let app = router().with_state(Arc::new(test_config(&upstream_url, None)));
+        let seen = send_forged(app, "/apis/default/api/patient").await;
+        assert_eq!(seen["secret"], serde_json::json!([]));
+    }
 }

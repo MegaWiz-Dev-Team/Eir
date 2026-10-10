@@ -15,6 +15,7 @@ use serde_json::{json, Value};
 use std::sync::Arc;
 
 use crate::config::Config;
+use crate::upstream;
 
 /// Build the agent tools router.
 pub fn router() -> Router<Arc<Config>> {
@@ -93,7 +94,7 @@ async fn fhir_query(
     let response = client
         .get(&upstream_url)
         .header("Accept", "application/fhir+json")
-        .header("X-Gateway", "eir-gateway")
+        .headers(upstream::gateway_identity_headers(&config))
         .header("X-Agent-Request", "bifrost")
         .send()
         .await
@@ -156,7 +157,7 @@ async fn patients_search(
     let response = client
         .get(&upstream_url)
         .header("Accept", "application/fhir+json")
-        .header("X-Gateway", "eir-gateway")
+        .headers(upstream::gateway_identity_headers(&config))
         .header("X-Agent-Request", "bifrost")
         .send()
         .await
@@ -220,7 +221,7 @@ async fn clinical_summary(
         match client
             .get(&url)
             .header("Accept", "application/fhir+json")
-            .header("X-Gateway", "eir-gateway")
+            .headers(upstream::gateway_identity_headers(&config))
             .send()
             .await
         {

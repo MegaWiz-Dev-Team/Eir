@@ -19,6 +19,7 @@ use std::sync::Arc;
 
 use crate::config::Config;
 use crate::oauth::TokenService;
+use crate::upstream;
 
 /// Shared state for patient handlers.
 #[derive(Clone)]
@@ -111,7 +112,7 @@ async fn search_patients(
     let response = client
         .get(&upstream_url)
         .header("Accept", "application/fhir+json")
-        .header("X-Gateway", "eir-gateway")
+        .headers(upstream::gateway_identity_headers(&state.config))
         .header("X-MCP-Tool", "search_patients")
         .header("Authorization", &auth)
         .send()
@@ -166,21 +167,21 @@ async fn get_patient_summary(
         "{}/apis/default/fhir/Patient/{}",
         state.config.openemr_url, patient_id
     );
-    let patient_data = fetch_json(&client, &patient_url, &auth).await;
+    let patient_data = fetch_json(&client, &state.config, &patient_url, &auth).await;
 
     // 2. Fetch CPAP Prescription (LBF form via OpenEMR API)
     let cpap_url = format!(
         "{}/apis/default/api/patient/{}/medical_problem?type=CPAP_Prescription",
         state.config.openemr_url, patient_id
     );
-    let cpap_data = fetch_json(&client, &cpap_url, &auth).await;
+    let cpap_data = fetch_json(&client, &state.config, &cpap_url, &auth).await;
 
     // 3. Fetch latest Sleep Report data (LBF form via OpenEMR API)
     let sleep_url = format!(
         "{}/apis/default/api/patient/{}/medical_problem?type=Sleep_Report_Data&_count=7",
         state.config.openemr_url, patient_id
     );
-    let sleep_data = fetch_json(&client, &sleep_url, &auth).await;
+    let sleep_data = fetch_json(&client, &state.config, &sleep_url, &auth).await;
 
     Ok(Json(PatientSummaryResponse {
         status: "success".into(),
@@ -246,7 +247,7 @@ async fn create_encounter(
         .post(&upstream_url)
         .header("Content-Type", "application/fhir+json")
         .header("Accept", "application/fhir+json")
-        .header("X-Gateway", "eir-gateway")
+        .headers(upstream::gateway_identity_headers(&state.config))
         .header("X-MCP-Tool", "create_encounter")
         .header("Authorization", &auth)
         .json(&encounter)
@@ -314,7 +315,7 @@ async fn get_sleep_reports(
     let response = client
         .get(&upstream_url)
         .header("Accept", "application/json")
-        .header("X-Gateway", "eir-gateway")
+        .headers(upstream::gateway_identity_headers(&state.config))
         .header("X-MCP-Tool", "get_sleep_reports")
         .header("Authorization", &auth)
         .send()
@@ -385,11 +386,11 @@ fn build_client() -> reqwest::Client {
 }
 
 /// Fetch JSON from an upstream URL, returning a Value. Errors become null.
-async fn fetch_json(client: &reqwest::Client, url: &str, auth: &str) -> Value {
+async fn fetch_json(client: &reqwest::Client, config: &Config, url: &str, auth: &str) -> Value {
     match client
         .get(url)
         .header("Accept", "application/json")
-        .header("X-Gateway", "eir-gateway")
+        .headers(upstream::gateway_identity_headers(config))
         .header("Authorization", auth)
         .send()
         .await

@@ -38,6 +38,7 @@ mod proxy;
 mod rate_limit;
 mod rbac;
 mod transform;
+mod upstream;
 mod webhook;
 
 use axum::middleware;
@@ -80,6 +81,27 @@ async fn main() {
         bifrost_url = %config.bifrost_url,
         "Bifrost agent target configured"
     );
+
+    // Gateway trust towards OpenEMR (see upstream.rs and SkipAuthorizationStrategy.php)
+    match &config.eir_gateway_secret {
+        None => tracing::warn!(
+            "EIR_GATEWAY_SECRET not set: OpenEMR will not trust this gateway; \
+             upstream calls must carry their own Bearer token"
+        ),
+        Some(secret) if secret.expose().len() < config::GatewaySecret::MIN_LEN => tracing::error!(
+            min_len = config::GatewaySecret::MIN_LEN,
+            "EIR_GATEWAY_SECRET is shorter than OpenEMR accepts: OpenEMR will reject gateway trust"
+        ),
+        Some(_) => {
+            if !config.auth_enabled {
+                tracing::warn!(
+                    "AUTH_ENABLED=false while EIR_GATEWAY_SECRET is set: every caller that can \
+                     reach this gateway is vouched for to OpenEMR (system role). Keep the \
+                     gateway off untrusted networks or enable auth."
+                );
+            }
+        }
+    }
 
     let shared_config = Arc::new(config.clone());
 
