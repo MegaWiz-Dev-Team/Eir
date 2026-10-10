@@ -12,6 +12,21 @@ class SkipAuthorizationStrategy implements IAuthorizationStrategy
     use SystemLoggerAwareTrait;
 
     /**
+     * Environment variable holding the secret shared with eir-gateway.
+     * Unset, empty or shorter than GATEWAY_SECRET_MIN_LENGTH means no request is
+     * ever trusted as coming from the gateway (fail closed).
+     */
+    public const GATEWAY_SECRET_ENV = 'EIR_GATEWAY_SECRET';
+
+    /**
+     * Request header eir-gateway sends the shared secret in. A bare
+     * "X-Gateway: eir-gateway" header is informational only and is never trusted.
+     */
+    public const GATEWAY_SECRET_HEADER = 'X-Eir-Gateway-Secret';
+
+    public const GATEWAY_SECRET_MIN_LENGTH = 32;
+
+    /**
      * @var string[] List of routes to skip authorization for
      */
     private array $skipRoutes = [];
@@ -19,6 +34,55 @@ class SkipAuthorizationStrategy implements IAuthorizationStrategy
     private bool $skipOptionsMethod = true;
 
     private ?UserService $userService = null;
+
+    private ?string $gatewaySecret = null;
+
+    private bool $gatewaySecretLoaded = false;
+
+    /**
+     * Override the gateway secret (tests / dependency injection). Passing null
+     * disables gateway trust.
+     */
+    public function setGatewaySecret(?string $gatewaySecret): void
+    {
+        $this->gatewaySecret = $gatewaySecret;
+        $this->gatewaySecretLoaded = true;
+    }
+
+    private function getGatewaySecret(): ?string
+    {
+        if (!$this->gatewaySecretLoaded) {
+            $value = getenv(self::GATEWAY_SECRET_ENV);
+            $this->gatewaySecret = is_string($value) ? $value : null;
+            $this->gatewaySecretLoaded = true;
+        }
+        return $this->gatewaySecret;
+    }
+
+    /**
+     * True only when the request carries the secret shared with eir-gateway,
+     * compared in constant time. Fails closed when no usable secret is configured.
+     */
+    public function isTrustedGatewayRequest(HttpRestRequest $request): bool
+    {
+        $expected = trim($this->getGatewaySecret() ?? '');
+        if (strlen($expected) < self::GATEWAY_SECRET_MIN_LENGTH) {
+            return false;
+        }
+        $presented = $request->headers->get(self::GATEWAY_SECRET_HEADER);
+        if (!is_string($presented) || $presented === '') {
+            return false;
+        }
+        if (hash_equals($expected, $presented)) {
+            return true;
+        }
+        // never log the presented value
+        $this->getSystemLogger()?->warning(
+            "SkipAuthorizationStrategy: rejected gateway trust, shared secret mismatch",
+            ['clientIp' => $request->getClientIp()]
+        );
+        return false;
+    }
 
     public function getUserService(): UserService
     {
@@ -49,7 +113,7 @@ class SkipAuthorizationStrategy implements IAuthorizationStrategy
             return true;
         }
 
-        if ($request->headers->get('X-Gateway') === 'eir-gateway') {
+        if ($this->isTrustedGatewayRequest($request)) {
             return true;
         }
 
