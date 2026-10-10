@@ -27,6 +27,38 @@ pub struct Config {
     pub tenant_id: String,
     /// Bifrost agent runtime URL
     pub bifrost_url: String,
+    /// Secret shared with OpenEMR (`EIR_GATEWAY_SECRET`); sent only to OpenEMR.
+    /// `None` = OpenEMR never trusts this gateway (fail closed).
+    pub eir_gateway_secret: Option<GatewaySecret>,
+}
+
+/// Shared secret that never appears in `Debug` output or logs.
+#[derive(Clone, PartialEq, Eq)]
+pub struct GatewaySecret(String);
+
+impl GatewaySecret {
+    /// Shortest secret OpenEMR accepts (`SkipAuthorizationStrategy::GATEWAY_SECRET_MIN_LENGTH`).
+    pub const MIN_LEN: usize = 32;
+
+    /// Trimmed, non-empty secret that is a valid header value; `None` otherwise.
+    pub fn new(raw: &str) -> Option<Self> {
+        let trimmed = raw.trim();
+        if trimmed.is_empty() || http::HeaderValue::from_str(trimmed).is_err() {
+            None
+        } else {
+            Some(Self(trimmed.to_string()))
+        }
+    }
+
+    pub fn expose(&self) -> &str {
+        &self.0
+    }
+}
+
+impl std::fmt::Debug for GatewaySecret {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("GatewaySecret(<redacted>)")
+    }
 }
 
 impl Config {
@@ -63,6 +95,9 @@ impl Config {
             tenant_id: env::var("TENANT_ID").unwrap_or_else(|_| "default".to_string()),
             bifrost_url: env::var("BIFROST_URL")
                 .unwrap_or_else(|_| "http://bifrost:8100".to_string()),
+            eir_gateway_secret: env::var("EIR_GATEWAY_SECRET")
+                .ok()
+                .and_then(|v| GatewaySecret::new(&v)),
         }
     }
 }
@@ -87,6 +122,14 @@ mod tests {
         assert_eq!(config.rate_limit_rps, 100);
         assert_eq!(config.cache_ttl_secs, 60);
         assert_eq!(config.tenant_id, "default");
+    }
+
+    #[test]
+    fn test_gateway_secret_trimmed_and_redacted() {
+        assert_eq!(GatewaySecret::new("  \n"), None);
+        let secret = GatewaySecret::new("abc-secret\n").unwrap();
+        assert_eq!(secret.expose(), "abc-secret");
+        assert!(!format!("{secret:?}").contains("abc-secret"));
     }
 }
 
